@@ -96,6 +96,7 @@
     .prof-avatar { width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 113, 227, 0.1); color: var(--apple-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .drawer-efetivo { background: rgba(240, 246, 255, 0.7); backdrop-filter: blur(16px); border: 1px dashed rgba(0, 113, 227, 0.25); border-radius: 16px; padding: 16px; margin-top: 14px; display: none; }
 
+    /* CARDS INFORMATIVOS (LGPD E PRAZO) */
     .info-card { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(0, 113, 227, 0.15); border-radius: 18px; padding: 14px 18px; display: flex; align-items: flex-start; gap: 12px; font-size: 0.8rem; color: #555558; line-height: 1.45; transition: all 0.3s ease; }
     .info-icon { color: var(--apple-primary); background: rgba(0, 113, 227, 0.1); padding: 6px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s ease;}
 
@@ -164,6 +165,7 @@
       <div class="mb-3">
         <label class="liquid-label">2. POLO / MUNICÍPIO</label>
         <select id="selectPolo" class="liquid-input mb-2" onchange="carregarEscolas()"><option value="">-- Escolha o Polo --</option></select>
+        <!-- AVISO DO POLO MIP -->
         <div class="p-2 px-3 rounded-3 d-flex align-items-center gap-2 text-muted mt-2" style="background: rgba(0,0,0,0.03); font-size: 0.8rem;">
           <span class="material-symbols-rounded text-primary fs-6">info</span>
           <span><b>Polo MIP:</b> Compreende Mongaguá, Itanhaém e Peruíbe.</span>
@@ -217,6 +219,7 @@
         </div>
       </div>
 
+      <!-- CARD LGPD INSTITUCIONAL -->
       <div class="info-card mb-4">
         <div class="info-icon"><span class="material-symbols-rounded fs-5">shield</span></div>
         <div>
@@ -309,7 +312,7 @@
   </div>
 
   <script>
-    // ⚠️ SUBSTITUA PELA SUA URL DO APPS SCRIPT
+    // URL DE TESTES DA API (JÁ APONTANDO PRO SEU AMBIENTE CLONADO):
     const API_URL = "https://script.google.com/macros/s/AKfycbzJD2xKp1M-3ulBjrY47k-2hA6T9mblC_3Jp-N6LbzVo05bPy6cAw_sdebfVyLMxfJV5g/exec";
 
     let estruturaCompleta = null, dadosAtuais = null, poloSelecionado = null;
@@ -321,24 +324,31 @@
     let calendarioEventosCache = null;
     const coresCalendario = ['#0071e3', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#f43f5e'];
 
+    // 🚀 LÓGICA ATUALIZADA: Puxa Dados via POST na carga inicial
     window.onload = function() { 
-      fetch(`${API_URL}?action=getEstrutura`)
-        .then(res => res.json())
-        .then(p => {
-          estruturaCompleta = p.estrutura; 
-          document.getElementById('selectPolo').innerHTML = '<option value="">-- Escolha o Polo --</option>' + p.polos.map(x => `<option value="${x}">${x}</option>`).join('');
-        })
-        .catch(() => exibirMensagem('error', 'Falha ao carregar polos escolares.'));
+      fetch(API_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'getEstrutura' })
+      })
+      .then(res => res.json())
+      .then(p => {
+        estruturaCompleta = p.estrutura; 
+        document.getElementById('selectPolo').innerHTML = '<option value="">-- Escolha o Polo --</option>' + p.polos.map(x => `<option value="${x}">${x}</option>`).join('');
+      })
+      .catch(() => exibirMensagem('error', 'Falha ao carregar polos escolares.'));
 
-      fetch(`${API_URL}?action=getComponentes`)
-        .then(res => res.json())
-        .then(c => {
-          componentesGlobais = c;
-          let sel = document.getElementById('selectComponente');
-          sel.innerHTML = '<option value="">-- Selecione a Formação --</option>';
-          c.forEach(comp => { sel.innerHTML += `<option value="${comp.nome}">${comp.nome}</option>`; });
-        })
-        .catch(() => exibirMensagem('error', 'Falha ao carregar formações ativas.'));
+      fetch(API_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'getComponentes' })
+      })
+      .then(res => res.json())
+      .then(dados => {
+        componentesGlobais = dados.formacoes;
+        let sel = document.getElementById('selectComponente');
+        sel.innerHTML = '<option value="">-- Selecione a Formação --</option>';
+        dados.formacoes.forEach(comp => { sel.innerHTML += `<option value="${comp.nome}">${comp.nome}</option>`; });
+      })
+      .catch(() => exibirMensagem('error', 'Falha ao carregar formações ativas.'));
     };
 
     function toggleSenha() {
@@ -426,24 +436,27 @@
       let divCal = document.getElementById('calendar');
       divCal.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
       
-      fetch(`${API_URL}?action=getCalendario`)
-        .then(res => res.json())
-        .then(eventosBase => {
-          calendarioEventosCache = eventosBase;
-          divCal.innerHTML = ''; 
-          let eventosProntos = eventosBase.map((ev, index) => {
-            return { title: ev.title, start: ev.start, allDay: true, backgroundColor: coresCalendario[index % coresCalendario.length], extendedProps: ev.extendedProps };
-          });
+      fetch(API_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'getCalendario' })
+      })
+      .then(res => res.json())
+      .then(eventosBase => {
+        calendarioEventosCache = eventosBase;
+        divCal.innerHTML = ''; 
+        let eventosProntos = eventosBase.map((ev, index) => {
+          return { title: ev.title, start: ev.start, allDay: true, backgroundColor: coresCalendario[index % coresCalendario.length], extendedProps: ev.extendedProps };
+        });
 
-          let dataInicial = eventosProntos.length > 0 ? eventosProntos[0].start : new Date();
-          calendarioInstancia = new FullCalendar.Calendar(divCal, {
-            initialView: 'dayGridMonth', initialDate: dataInicial, locale: 'pt-br', events: eventosProntos,
-            headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
-            eventClick: function(info) { alert(`Formação: ${info.event.extendedProps.componente}\nTurno: ${info.event.extendedProps.turno}\nLocal: ${info.event.extendedProps.local}`); }
-          });
-          setTimeout(() => { calendarioInstancia.render(); }, 150);
-        })
-        .catch(() => { divCal.innerHTML = '<div class="alert alert-danger text-center">Erro ao conectar com o banco.</div>'; });
+        let dataInicial = eventosProntos.length > 0 ? eventosProntos[0].start : new Date();
+        calendarioInstancia = new FullCalendar.Calendar(divCal, {
+          initialView: 'dayGridMonth', initialDate: dataInicial, locale: 'pt-br', events: eventosProntos,
+          headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+          eventClick: function(info) { alert(`Formação: ${info.event.extendedProps.componente}\nTurno: ${info.event.extendedProps.turno}\nLocal: ${info.event.extendedProps.local}`); }
+        });
+        setTimeout(() => { calendarioInstancia.render(); }, 150);
+      })
+      .catch(() => { divCal.innerHTML = '<div class="alert alert-danger text-center">Erro ao conectar com o banco.</div>'; });
     }
 
     function carregarEscolas() {
@@ -486,29 +499,32 @@
       nomeGestorAtual = n; cargoGestorAtual = cg; componenteGlobal = c;
       document.getElementById('btnAcesso').innerHTML = 'Autenticando...';
       
-      fetch(`${API_URL}?action=getDadosEscola&escola=${encodeURIComponent(e)}&senha=${encodeURIComponent(s)}&componente=${encodeURIComponent(c)}`)
-        .then(res => res.json())
-        .then(res => {
-          document.getElementById('btnAcesso').innerHTML = 'Acessar Painel';
-          if(res.erro) return exibirMensagem('error', res.erro);
-          
-          document.getElementById('cardLogin').style.display = 'none'; 
-          document.getElementById('navAbasInicial').style.display = 'none'; 
-          document.getElementById('mensagemGlobal').style.display = 'none';
-          document.getElementById('btnSairNav').style.display = 'block';
-          
-          document.getElementById('appbarTitle').innerText = `${componenteGlobal}`;
-          document.getElementById('nomeEscolaLabel').innerText = e; 
-          document.getElementById('nomePoloLabel').innerText = res.polo;
-          document.getElementById('nomeResponsavelLabel').innerText = `Gestor(a): ${nomeGestorAtual} (${cargoGestorAtual})`;
-          
-          poloSelecionado = res.polo; 
-          exibirProfessores(res);
-        })
-        .catch(() => {
-          document.getElementById('btnAcesso').innerHTML = 'Acessar Painel';
-          exibirMensagem('error', 'Falha ao conectar com o servidor.');
-        });
+      fetch(API_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'getDadosEscola', escola: e, senha: s, componente: c })
+      })
+      .then(res => res.json())
+      .then(res => {
+        document.getElementById('btnAcesso').innerHTML = 'Acessar Painel';
+        if(res.erro) return exibirMensagem('error', res.erro);
+        
+        document.getElementById('cardLogin').style.display = 'none'; 
+        document.getElementById('navAbasInicial').style.display = 'none'; 
+        document.getElementById('mensagemGlobal').style.display = 'none';
+        document.getElementById('btnSairNav').style.display = 'block';
+        
+        document.getElementById('appbarTitle').innerText = `${componenteGlobal}`;
+        document.getElementById('nomeEscolaLabel').innerText = e; 
+        document.getElementById('nomePoloLabel').innerText = res.polo;
+        document.getElementById('nomeResponsavelLabel').innerText = `Gestor(a): ${nomeGestorAtual} (${cargoGestorAtual})`;
+        
+        poloSelecionado = res.polo; 
+        exibirProfessores(res);
+      })
+      .catch(() => {
+        document.getElementById('btnAcesso').innerHTML = 'Acessar Painel';
+        exibirMensagem('error', 'Falha ao conectar com o servidor.');
+      });
     }
 
     function exibirProfessores(dados) {
@@ -702,8 +718,7 @@
       document.getElementById('btnSalvar').innerHTML = 'Salvando...'; document.getElementById('btnSalvar').disabled = true;
 
       fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: 'salvarIndicacoes', indicacoes: indicacoes, email: email, escola: document.getElementById('selectEscola').value, polo: poloSelecionado, nomeGestor: nomeGestorAtual, cargoGestor: cargoGestorAtual, componente: componenteGlobal })
       })
       .then(res => res.json())
