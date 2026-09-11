@@ -43,7 +43,6 @@
     .apple-badge-icon { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, #0071e3, #60a5fa); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3); flex-shrink: 0; }
     .ure-logo { height: 38px; max-width: 130px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.04)); }
 
-    /* SELETOR DE COMPONENTE ESTILO APPLE */
     .apple-select-pill {
       appearance: none; background-color: rgba(0, 113, 227, 0.08); color: var(--apple-primary);
       font-weight: 600; font-size: 0.85rem; padding: 9px 36px 9px 16px; border-radius: 980px; border: 1px solid rgba(0, 113, 227, 0.2);
@@ -63,6 +62,7 @@
     .liquid-input { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 14px; padding: 13px 18px; width: 100%; font-size: 0.95rem; color: var(--apple-text); transition: all 0.2s ease; }
     .liquid-input:focus { background: rgba(255, 255, 255, 0.95); border-color: var(--apple-primary); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.16); outline: none; }
     select.liquid-input { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2386868b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 18px top 50%; background-size: 10px auto; }
+    
     .liquid-label { font-size: 0.82rem; font-weight: 600; color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
     .apple-badge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 14px; border-radius: 980px; font-size: 0.82rem; font-weight: 600; letter-spacing: -0.01em; border: 1px solid transparent; line-height: 1.2; }
@@ -98,6 +98,9 @@
     .btn-outline-danger:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; transform: scale(1.05); }
     .kanban-card { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
     .kanban-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important; }
+
+    /* ESSENCIAL: Garante que os templates de impressão fiquem rigorosamente invisíveis na tela normal */
+    #printArea, #printListaArea { display: none !important; }
 
     /* ESTILOS DE IMPRESSÃO */
     @media print {
@@ -387,6 +390,7 @@
   <div id="printListaArea"></div>
 
   <script>
+    // URL DA API DO SEU AMBIENTE DE TESTES!
     const API_URL = "https://script.google.com/macros/s/AKfycbzJD2xKp1M-3ulBjrY47k-2hA6T9mblC_3Jp-N6LbzVo05bPy6cAw_sdebfVyLMxfJV5g/exec";
 
     let dadosCache = null;
@@ -521,7 +525,7 @@
       if (aba === 'consolidado') renderizarConsolidado(dadosCache);
       if (aba === 'logs') carregarLogs();
       if (aba === 'declaracoes') renderizarDeclaracoes();
-      if (aba === 'criacao' && document.getElementById('cfListaTurnos').innerHTML === '') cfAdicionarTurno(); // Add first form line
+      if (aba === 'criacao' && document.getElementById('cfListaTurnos').innerHTML === '') cfAdicionarTurno();
     }
 
     // ========== FUNÇÕES DA NOVA TELA "CRIAR FORMAÇÃO" ==========
