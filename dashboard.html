@@ -62,6 +62,7 @@
     .liquid-btn-primary:disabled { opacity: 0.5; transform: none; cursor: not-allowed; box-shadow: none; }
     .liquid-input { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 14px; padding: 13px 18px; width: 100%; font-size: 0.95rem; color: var(--apple-text); transition: all 0.2s ease; }
     .liquid-input:focus { background: rgba(255, 255, 255, 0.95); border-color: var(--apple-primary); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.16); outline: none; }
+    select.liquid-input { appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2386868b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 18px top 50%; background-size: 10px auto; }
     .liquid-label { font-size: 0.82rem; font-weight: 600; color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 
     .apple-badge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 14px; border-radius: 980px; font-size: 0.82rem; font-weight: 600; letter-spacing: -0.01em; border: 1px solid transparent; line-height: 1.2; }
@@ -97,9 +98,6 @@
     .btn-outline-danger:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; transform: scale(1.05); }
     .kanban-card { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
     .kanban-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important; }
-
-    /* ESSENCIAL: Garante que os templates de impressão fiquem rigorosamente invisíveis na tela normal */
-    #printArea, #printListaArea { display: none !important; }
 
     /* ESTILOS DE IMPRESSÃO */
     @media print {
@@ -167,7 +165,7 @@
 
     <div class="container" style="max-width: 1020px;">
       
-      <!-- MENU DE ABAS -->
+      <!-- MENU DE ABAS (AGORA COM "NOVA FORMAÇÃO") -->
       <div class="text-center mb-4">
         <div class="liquid-segmented">
           <button id="btnAbaEscola" class="nav-active" onclick="mudarAba('escolas')"><span class="material-symbols-rounded fs-6">list</span> Lista</button>
@@ -175,6 +173,7 @@
           <button id="btnAbaTurno" onclick="mudarAba('turnos')"><span class="material-symbols-rounded fs-6">checklist</span> Por Turno</button>
           <button id="btnAbaConsolidado" onclick="mudarAba('consolidado')"><span class="material-symbols-rounded fs-6">table_chart</span> Consolidado</button>
           <button id="btnAbaAnalytics" onclick="mudarAba('analytics')"><span class="material-symbols-rounded fs-6">insights</span> Analytics</button>
+          <button id="btnAbaCriacao" onclick="mudarAba('criacao')" style="display: none;"><span class="material-symbols-rounded fs-6">add_circle</span> Nova Formação</button>
           <button id="btnAbaDeclaracoes" onclick="mudarAba('declaracoes')"><span class="material-symbols-rounded fs-6">description</span> Declarações</button>
           <button id="btnAbaLogs" onclick="mudarAba('logs')"><span class="material-symbols-rounded fs-6">history</span> Logs</button>
         </div>
@@ -191,6 +190,7 @@
           <div class="kpi-card"><div class="kpi-title text-danger">Faltas</div><div class="kpi-value text-danger" id="kpiFaltas">0</div></div>
         </div>
 
+        <!-- ABA 1: VISÃO POR ESCOLA (LISTA) -->
         <div id="viewEscolas">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <input type="text" id="inputPesquisaEscola" class="form-control rounded-pill px-4 py-2 glass-panel border-0 w-100 me-3" placeholder="Pesquisar unidade escolar..." onkeyup="filtrarEscolas()">
@@ -259,6 +259,41 @@
                 <thead class="table-light bg-transparent"><tr><th>Data/Hora</th><th>Usuário / Escola</th><th>Ação</th><th>Detalhes</th></tr></thead>
                 <tbody id="tabelaLogs"></tbody>
               </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 8: CRIAR NOVA FORMAÇÃO -->
+        <div id="viewCriacao" style="display: none;">
+          <div class="glass-panel p-4 mb-4">
+            <h5 class="fw-bold text-primary mb-1 d-flex align-items-center gap-2"><span class="material-symbols-rounded">add_circle</span> Criar Nova Formação</h5>
+            <p class="text-muted mb-4" style="font-size:0.85rem;">Cadastre as turmas, horários e limites de vagas. Isso alimentará o calendário e o portal das escolas.</p>
+            
+            <div class="row g-3 mb-4">
+              <div class="col-md-12">
+                <label class="liquid-label">Componente / Título da Formação *</label>
+                <input type="text" id="cfComponente" class="liquid-input" placeholder="Ex: CIÊNCIAS HUMANAS" oninput="this.value = this.value.toUpperCase()">
+              </div>
+              <div class="col-md-6">
+                <label class="liquid-label">Data de Abertura (Opcional)</label>
+                <input type="date" id="cfAbertura" class="liquid-input">
+                <small class="text-muted" style="font-size: 0.7rem;">Deixe vazio para liberar a inscrição imediatamente.</small>
+              </div>
+              <div class="col-md-6">
+                <label class="liquid-label">Data Limite das Inscrições *</label>
+                <input type="date" id="cfLimite" class="liquid-input">
+              </div>
+            </div>
+
+            <h6 class="fw-bold mt-4 mb-3 text-dark">Opções de Turno / Polos</h6>
+            <div id="cfListaTurnos" class="d-flex flex-column gap-3 mb-3"></div>
+            
+            <button class="btn btn-outline-primary rounded-pill fw-bold w-100 mb-4" onclick="cfAdicionarTurno()" style="border: 2px dashed var(--apple-primary); background: rgba(0, 113, 227, 0.05);">
+              <span class="material-symbols-rounded align-middle me-1">add</span> Adicionar Turno/Polo
+            </button>
+
+            <div class="pt-3 border-top mt-4">
+              <button id="btnSalvarNovaFormacao" class="liquid-btn-primary py-3" onclick="salvarNovaFormacao()">Salvar Formação no Banco de Dados</button>
             </div>
           </div>
         </div>
@@ -352,7 +387,7 @@
   <div id="printListaArea"></div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbw6gY49y19b-L6-90Ad7-RpJVdF-mZEPilE49RdH8ufMq7kkKVIlUS3xSZ57_4d9HMQ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbzJD2xKp1M-3ulBjrY47k-2hA6T9mblC_3Jp-N6LbzVo05bPy6cAw_sdebfVyLMxfJV5g/exec";
 
     let dadosCache = null;
     let chartFreqInstance = null, chartEscolasInstance = null, chartTurnosInstance = null;
@@ -383,6 +418,7 @@
           
           let isCec = usuarioAtivoLogin.toLowerCase() === 'cec' || nomeEspecialistaAtivo.toLowerCase().includes('cec') || nomeEspecialistaAtivo.toLowerCase().includes('renan');
           document.getElementById('btnLembretes').style.display = isCec ? 'inline-flex' : 'none';
+          document.getElementById('btnAbaCriacao').style.display = isCec ? 'inline-flex' : 'none';
 
           document.getElementById('loginScreen').style.display = 'none';
           document.getElementById('appScreen').style.display = 'block';
@@ -453,6 +489,7 @@
       let btnTurno = document.getElementById('btnAbaTurno'); let btnConsolidado = document.getElementById('btnAbaConsolidado');
       let btnAnalytics = document.getElementById('btnAbaAnalytics'); let btnLogs = document.getElementById('btnAbaLogs');
       let btnKanban = document.getElementById('btnAbaKanban'); let btnDec = document.getElementById('btnAbaDeclaracoes');
+      let btnCriar = document.getElementById('btnAbaCriacao');
 
       if(btnTurno && btnTurno.classList.contains('nav-active')) abaAtiva = 'turnos';
       else if(btnConsolidado && btnConsolidado.classList.contains('nav-active')) abaAtiva = 'consolidado';
@@ -460,14 +497,15 @@
       else if(btnLogs && btnLogs.classList.contains('nav-active')) abaAtiva = 'logs';
       else if(btnKanban && btnKanban.classList.contains('nav-active')) abaAtiva = 'kanban';
       else if(btnDec && btnDec.classList.contains('nav-active')) abaAtiva = 'declaracoes';
+      else if(btnCriar && btnCriar.classList.contains('nav-active')) abaAtiva = 'criacao';
 
       mudarAba(abaAtiva);
     }
 
     function mudarAba(aba) {
-      ['Escola', 'Turno', 'Consolidado', 'Analytics', 'Logs', 'Kanban', 'Declaracoes'].forEach(tab => {
+      ['Escola', 'Turno', 'Consolidado', 'Analytics', 'Logs', 'Kanban', 'Declaracoes', 'Criacao'].forEach(tab => {
         let btn = document.getElementById(`btnAba${tab}`);
-        if(btn) btn.className = (aba.toLowerCase() === tab.toLowerCase() || (aba==='escolas'&&tab==='Escola') || (aba==='turnos'&&tab==='Turno') || (aba==='declaracoes'&&tab==='Declaracoes')) ? 'nav-active' : '';
+        if(btn) btn.className = (aba.toLowerCase() === tab.toLowerCase() || (aba==='escolas'&&tab==='Escola') || (aba==='turnos'&&tab==='Turno') || (aba==='declaracoes'&&tab==='Declaracoes') || (aba==='criacao'&&tab==='Criacao')) ? 'nav-active' : '';
       });
 
       document.getElementById('viewEscolas').style.display = (aba === 'escolas') ? 'block' : 'none';
@@ -477,12 +515,121 @@
       document.getElementById('viewAnalytics').style.display = (aba === 'analytics') ? 'block' : 'none';
       document.getElementById('viewLogs').style.display = (aba === 'logs') ? 'block' : 'none';
       document.getElementById('viewDeclaracoes').style.display = (aba === 'declaracoes') ? 'block' : 'none';
+      document.getElementById('viewCriacao').style.display = (aba === 'criacao') ? 'block' : 'none';
 
       if (aba === 'analytics') renderizarAnalytics(dadosCache);
       if (aba === 'consolidado') renderizarConsolidado(dadosCache);
       if (aba === 'logs') carregarLogs();
       if (aba === 'declaracoes') renderizarDeclaracoes();
+      if (aba === 'criacao' && document.getElementById('cfListaTurnos').innerHTML === '') cfAdicionarTurno(); // Add first form line
     }
+
+    // ========== FUNÇÕES DA NOVA TELA "CRIAR FORMAÇÃO" ==========
+    function cfAdicionarTurno() {
+      let id = 'turno_' + Date.now();
+      let html = `
+        <div class="p-3 rounded-4 mt-3" id="${id}" style="background: rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); position: relative;">
+          <button class="btn btn-sm btn-light text-danger rounded-circle p-1 shadow-sm" onclick="document.getElementById('${id}').remove()" style="position: absolute; top: -10px; right: -10px;" title="Remover Turno">
+            <span class="material-symbols-rounded fs-6 align-middle">close</span>
+          </button>
+          <div class="row g-2">
+            <div class="col-md-3">
+              <label class="liquid-label" style="font-size:0.7rem;">Polo *</label>
+              <select class="liquid-input py-2 cf-polo">
+                <option value="SÃO VICENTE">SÃO VICENTE</option>
+                <option value="PRAIA GRANDE">PRAIA GRANDE</option>
+                <option value="MIP">MIP (Mongaguá, Itanhaém, Peruíbe)</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="liquid-label" style="font-size:0.7rem;">Data do Turno *</label>
+              <input type="date" class="liquid-input py-2 cf-data">
+            </div>
+            <div class="col-md-3">
+              <label class="liquid-label" style="font-size:0.7rem;">Período *</label>
+              <select class="liquid-input py-2 cf-periodo">
+                <option value="Manhã">Manhã</option>
+                <option value="Tarde">Tarde</option>
+                <option value="Noite">Noite</option>
+                <option value="Integral">Integral</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="liquid-label" style="font-size:0.7rem;">Total de Vagas *</label>
+              <input type="number" class="liquid-input py-2 cf-limite" placeholder="Ex: 80">
+            </div>
+            <div class="col-md-12 mt-2">
+              <label class="liquid-label" style="font-size:0.7rem;">Local Completo da Formação *</label>
+              <input type="text" class="liquid-input py-2 cf-local" placeholder="Ex: E.E. Leopoldo José Sant'Ana - Rua José Gonçalves Paim, 60, no bairro Parque Bitaru...">
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('cfListaTurnos').insertAdjacentHTML('beforeend', html);
+    }
+
+    function salvarNovaFormacao() {
+      let componente = document.getElementById('cfComponente').value.trim();
+      let abertura = document.getElementById('cfAbertura').value;
+      let limite = document.getElementById('cfLimite').value;
+      
+      if(!componente || !limite) { alert("Preencha o Componente e a Data Limite das inscrições!"); return; }
+      
+      let turnosDivs = document.querySelectorAll('#cfListaTurnos > div');
+      if(turnosDivs.length === 0) { alert("Adicione pelo menos um turno/polo para a formação."); return; }
+      
+      let turnos = [];
+      let erroTurno = false;
+      turnosDivs.forEach(div => {
+        let p = div.querySelector('.cf-polo').value;
+        let d = div.querySelector('.cf-data').value;
+        let per = div.querySelector('.cf-periodo').value;
+        let lim = div.querySelector('.cf-limite').value;
+        let loc = div.querySelector('.cf-local').value.trim();
+        
+        if(!d || !lim || !loc) erroTurno = true;
+        
+        turnos.push({ polo: p, data: d, periodo: per, limite: lim, local: loc });
+      });
+      
+      if(erroTurno) { alert("Preencha todos os campos obrigatórios dos turnos (Data, Vagas e Local)."); return; }
+      
+      let btn = document.getElementById('btnSalvarNovaFormacao');
+      let textoOriginal = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Salvando no Banco de Dados...';
+      btn.disabled = true;
+
+      fetch(API_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ 
+          action: 'criarFormacao', 
+          pecLogado: nomeEspecialistaAtivo, 
+          componente: componente,
+          dataAbertura: abertura,
+          dataLimite: limite,
+          turnos: turnos
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        btn.innerHTML = textoOriginal; btn.disabled = false;
+        if(res.sucesso) { 
+          alert(`Formação "${componente.toUpperCase()}" cadastrada com sucesso!`);
+          document.getElementById('cfComponente').value = '';
+          document.getElementById('cfAbertura').value = '';
+          document.getElementById('cfLimite').value = '';
+          document.getElementById('cfListaTurnos').innerHTML = '';
+          cfAdicionarTurno(); // Reinicia com 1 box limpo
+          iniciarPainel(); // Recarrega os dados do dropdown
+          carregarLogs();
+        } 
+        else { alert('Aviso: ' + res.mensagem); }
+      }).catch(() => {
+        alert('Erro de conexão ao tentar salvar formação.');
+        btn.innerHTML = textoOriginal; btn.disabled = false;
+      });
+    }
+    // =======================================================
 
     function renderizarDeclaracoes() {
       todosProfessoresCache = [];
@@ -718,33 +865,6 @@
       window.print();
       document.body.classList.remove('print-mode-lista');
       fecharModalLista();
-    }
-
-    function renderizarConsolidado(dados) {
-      if(!dados) return;
-      let cardsPolos = document.getElementById('cardsPolosGrid'); let tbodyPolos = document.getElementById('tabelaConsolidadoPolos');
-      cardsPolos.innerHTML = ''; tbodyPolos.innerHTML = '';
-      if (dados.consolidadoPolos && dados.consolidadoPolos.length > 0) {
-        dados.consolidadoPolos.forEach(p => {
-          cardsPolos.innerHTML += `<div class="col-md-4"><div class="glass-panel p-3"><div class="d-flex justify-content-between align-items-center mb-2"><span class="apple-badge apple-badge-blue">${p.polo}</span><span class="text-muted" style="font-size:0.8rem;"><b>${p.taxaPresenca}%</b> Presença</span></div><div class="d-flex justify-content-between text-muted" style="font-size:0.82rem;"><span>Ativos:</span><strong class="text-dark">${p.total}</strong></div><div class="d-flex justify-content-between text-muted" style="font-size:0.82rem;"><span>Presentes / Faltas:</span><strong class="text-success">${p.presentes} <span class="text-muted">/</span> <span class="text-danger">${p.faltas}</span></strong></div><div class="d-flex justify-content-between text-muted" style="font-size:0.82rem;"><span>Pendentes:</span><strong class="text-danger">${p.pendentes}</strong></div></div></div>`;
-          tbodyPolos.innerHTML += `<tr><td class="fw-bold">${p.polo}</td><td class="text-center">${p.total}</td><td class="text-center text-primary fw-bold">${p.indicados}</td><td class="text-center text-danger fw-bold">${p.pendentes}</td><td class="text-center text-success fw-bold">${p.presentes}</td><td class="text-center text-danger fw-bold">${p.faltas}</td><td class="text-center fw-bold">${p.taxaPresenca}%</td></tr>`;
-        });
-      }
-      let tbodyComp = document.getElementById('tabelaConsolidadoComponentes'); tbodyComp.innerHTML = '';
-      if (dados.consolidadoComponentes && dados.consolidadoComponentes.length > 0) {
-        dados.consolidadoComponentes.forEach(c => {
-          tbodyComp.innerHTML += `<tr><td class="fw-bold">${c.componente}</td><td class="text-center">${c.total}</td><td class="text-center text-primary fw-bold">${c.indicados}</td><td class="text-center text-danger fw-bold">${c.pendentes}</td><td class="text-center text-success fw-bold">${c.presentes}</td><td class="text-center text-danger fw-bold">${c.faltas}</td><td class="text-center fw-bold">${c.taxaPresenca}%</td></tr>`;
-        });
-      }
-    }
-
-    function exportarRelatorioConsolidado() {
-      if (!dadosCache) return;
-      let csvContent = "\uFEFF--- CONSOLIDADO POR POLO REGIONAL ---\nPolo;Total Ativos;Indicados;Pendentes;Presentes;Faltas;Taxa Presenca (%)\n";
-      dadosCache.consolidadoPolos.forEach(p => csvContent += `"${p.polo}";${p.total};${p.indicados};${p.pendentes};${p.presentes};${p.faltas};"${p.taxaPresenca}%"\n`);
-      csvContent += "\n--- CONSOLIDADO POR COMPONENTE CURRICULAR ---\nComponente;Total Ativos;Indicados;Pendentes;Presentes;Faltas;Taxa Presenca (%)\n";
-      dadosCache.consolidadoComponentes.forEach(c => csvContent += `"${c.componente}";${c.total};${c.indicados};${c.pendentes};${c.presentes};${c.faltas};"${c.taxaPresenca}%"\n`);
-      let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }); let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `Relatorio_Consolidado_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.csv`; link.click();
     }
 
     function abrirModalEscola(idx) {
