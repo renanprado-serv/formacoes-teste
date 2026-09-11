@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Especialistas - Gestão Regional</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --apple-bg: #f5f5f7;
+      --apple-primary: #0071e3;
+      --apple-text: #1d1d1f;
+      --apple-text-secondary: #86868b;
+      --apple-card-bg: rgba(255, 255, 255, 0.75);
+      --apple-card-border: rgba(255, 255, 255, 0.85);
+      --apple-shadow: 0 12px 36px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.02);
+      --apple-glass-inset: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: var(--apple-bg);
+      background-image: 
+        radial-gradient(at 10% 15%, rgba(0, 113, 227, 0.12) 0px, transparent 45%),
+        radial-gradient(at 85% 10%, rgba(99, 102, 241, 0.14) 0px, transparent 40%),
+        radial-gradient(at 50% 85%, rgba(236, 72, 153, 0.08) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, rgba(56, 189, 248, 0.12) 0px, transparent 40%);
+      background-attachment: fixed;
+      font-family: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      color: var(--apple-text);
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 60px;
+    }
+
+    .glass-panel { background: var(--apple-card-bg); backdrop-filter: blur(30px) saturate(190%); border: 1px solid var(--apple-card-border); border-radius: 24px; box-shadow: var(--apple-shadow), var(--apple-glass-inset); }
+    .glass-appbar { background: rgba(255, 255, 255, 0.82); backdrop-filter: blur(25px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 980px; padding: 12px 28px; margin: 24px auto 32px auto; max-width: 1020px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), var(--apple-glass-inset); }
+    .apple-badge-icon { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, #0071e3, #60a5fa); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3); flex-shrink: 0; }
+    .ure-logo { height: 38px; max-width: 130px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.04)); }
+
+    /* SELETOR DE COMPONENTE ESTILO APPLE */
+    .apple-select-pill {
+      appearance: none; background-color: rgba(0, 113, 227, 0.08); color: var(--apple-primary);
+      font-weight: 600; font-size: 0.85rem; padding: 9px 36px 9px 16px; border-radius: 980px; border: 1px solid rgba(0, 113, 227, 0.2);
+      cursor: pointer; transition: all 0.2s ease;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%230071e3%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; outline: none; max-width: 100%;
+    }
+    .apple-select-pill:hover { background-color: rgba(0, 113, 227, 0.14); border-color: var(--apple-primary); box-shadow: 0 4px 12px rgba(0, 113, 227, 0.12); }
+    .apple-select-pill:focus { box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.25); }
+
+    .btn-apple-refresh { background: rgba(255, 255, 255, 0.8); color: var(--apple-text); border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 980px; padding: 8px 16px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); cursor: pointer; }
+    .btn-apple-refresh:hover { background: #ffffff; border-color: rgba(0, 0, 0, 0.2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); }
+
+    .liquid-btn-primary { background: linear-gradient(180deg, #0077ed 0%, #0062cc 100%); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 980px; padding: 14px 28px; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(0, 119, 237, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4); transition: all 0.2s ease; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+    .liquid-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0, 119, 237, 0.4); color: #fff; }
+    .liquid-btn-primary:disabled { opacity: 0.5; transform: none; cursor: not-allowed; box-shadow: none; }
+    .liquid-input { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 14px; padding: 13px 18px; width: 100%; font-size: 0.95rem; color: var(--apple-text); transition: all 0.2s ease; }
+    .liquid-input:focus { background: rgba(255, 255, 255, 0.95); border-color: var(--apple-primary); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.16); outline: none; }
+    .liquid-label { font-size: 0.82rem; font-weight: 600; color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+
+    .apple-badge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 14px; border-radius: 980px; font-size: 0.82rem; font-weight: 600; letter-spacing: -0.01em; border: 1px solid transparent; line-height: 1.2; }
+    .apple-badge-blue { background: rgba(0, 113, 227, 0.12) !important; color: #0071e3 !important; border-color: rgba(0, 113, 227, 0.25) !important; }
+    .apple-badge-green { background: rgba(16, 185, 129, 0.12) !important; color: #059669 !important; border-color: rgba(16, 185, 129, 0.25) !important; }
+    .apple-badge-red { background: rgba(239, 68, 68, 0.12) !important; color: #dc2626 !important; border-color: rgba(239, 68, 68, 0.25) !important; }
+    .apple-badge-gray { background: rgba(120, 120, 128, 0.12) !important; color: #555558 !important; border-color: rgba(120, 120, 128, 0.2) !important; }
+
+    .liquid-segmented { background: rgba(118, 118, 128, 0.12); backdrop-filter: blur(20px); padding: 5px; border-radius: 980px; display: inline-flex; gap: 6px; border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04); flex-wrap: wrap; justify-content: center; }
+    .liquid-segmented button { border: none; background: transparent; color: var(--apple-text-secondary); padding: 8px 20px; border-radius: 980px; font-size: 0.88rem; font-weight: 500; transition: all 0.25s ease; display: flex; align-items: center; gap: 6px; }
+    .liquid-segmented button.nav-active { background: rgba(255, 255, 255, 0.95); color: var(--apple-text); box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); font-weight: 600; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .kpi-card { background: rgba(255, 255, 255, 0.68); backdrop-filter: blur(20px); border-radius: 20px; padding: 22px; border: 1px solid rgba(255, 255, 255, 0.85); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03), var(--apple-glass-inset); text-align: center; }
+    .kpi-title { font-size: 0.78rem; font-weight: 700; color: var(--apple-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .kpi-value { font-size: 2.2rem; font-weight: 700; color: var(--apple-text); line-height: 1.2; margin-top: 4px; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(12px); padding: 20px; }
+    .modal-content-apple { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(35px) saturate(190%); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 28px; width: 100%; max-width: 700px; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); max-height: 90vh; display: flex; flex-direction: column; }
+    #modalListaPresenca { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
+
+    .btn-presenca { border-radius: 980px; font-weight: 600; padding: 6px 16px; font-size: 0.82rem; transition: 0.2s; border: 1px solid transparent; }
+    .btn-presente { background: rgba(16, 185, 129, 0.15); color: #059669; border-color: rgba(16, 185, 129, 0.3); }
+    .btn-falta { background: rgba(239, 68, 68, 0.15); color: #dc2626; border-color: rgba(239, 68, 68, 0.3); }
+    .btn-neutro { background: rgba(0, 0, 0, 0.05); color: #6e6e73; border-color: rgba(0, 0, 0, 0.08); }
+
+    .prog-bg { height: 6px; background-color: rgba(0,0,0,0.06); border-radius: 980px; width: 100%; overflow: hidden; margin-top: 10px; }
+    .prog-fill { height: 100%; border-radius: 980px; transition: 0.8s ease-out; }
+    .liquid-alert { border-radius: 16px; padding: 14px 20px; backdrop-filter: blur(20px); font-weight: 500; font-size: 0.92rem; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .liquid-alert-danger { background: rgba(255, 219, 219, 0.85); color: #c92a2a; border: 1px solid rgba(255, 150, 150, 0.4); }
+
+    .btn-outline-danger { transition: all 0.2s ease; }
+    .btn-outline-danger:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; transform: scale(1.05); }
+    .kanban-card { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
+    .kanban-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important; }
+
+    /* ESSENCIAL: Garante que os templates de impressão fiquem rigorosamente invisíveis na tela normal */
+    #printArea, #printListaArea { display: none !important; }
+
+    /* ESTILOS DE IMPRESSÃO */
+    @media print {
+      body > * { display: none !important; }
+
+      body.print-mode-dec #printArea { display: block !important; width: 100%; font-family: Arial, sans-serif; }
+      .print-border { border: 5px double #000; padding: 40px 50px; min-height: 95vh; box-sizing: border-box; }
+      .print-header-table { width: 100%; margin-bottom: 50px; text-align: center; }
+      .print-header-table td { vertical-align: middle; }
+      .print-logo-sp { max-height: 90px; }
+      .print-logo-ure { max-height: 80px; }
+      .print-header-text { font-size: 1rem; line-height: 1.3; }
+      .print-title { font-size: 1.5rem; font-weight: bold; text-align: center; margin-bottom: 60px; letter-spacing: 1px; }
+      .print-body { font-size: 1.15rem; line-height: 2; text-align: justify; margin-bottom: 60px; }
+      .print-indent { text-indent: 80px; margin-bottom: 25px; }
+      .print-footer { text-align: right; margin-top: 60px; font-size: 1.1rem; }
+
+      body.print-mode-lista @page { size: A4 landscape; margin: 8mm; }
+      body.print-mode-lista #printListaArea { display: block !important; width: 100%; font-family: Arial, sans-serif; }
+      
+      .print-page { width: 100%; box-sizing: border-box; }
+      .page-break { page-break-after: always; break-after: page; }
+      
+      .pl-header-table { width: 100%; margin-bottom: 10px; }
+      .pl-header-text { text-align: center; font-size: 11px; line-height: 1.3; }
+      .pl-title { font-size: 16px; font-weight: bold; text-align: center; margin: 15px 0; }
+      .pl-info-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 11px; }
+      .pl-info-table td { border: 1px solid #000; padding: 6px; }
+      .pl-main-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+      .pl-main-table th, .pl-main-table td { border: 1px solid #000; padding: 4px; text-align: center; vertical-align: middle; height: 30px; }
+      .pl-main-table th { font-weight: bold; background-color: #f5f5f5 !important; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TELA DE LOGIN DO ESPECIALISTA -->
+  <div class="container" id="loginScreen" style="max-width: 500px; margin-top: 10vh;">
+    <div class="glass-panel p-5 text-center">
+      <div class="apple-badge-icon mx-auto mb-4" style="width: 60px; height: 60px;"><span class="material-symbols-rounded fs-2">monitoring</span></div>
+      <h3 class="fw-bold mb-1">Área Restrita</h3>
+      <p class="text-muted mb-4" style="font-size: 0.9rem;">Autentique-se para acessar o Painel da URE.</p>
+      <div id="mensagemLogin" class="liquid-alert liquid-alert-danger" style="display:none;"></div>
+      <div class="text-start mb-3"><label class="liquid-label">Usuário</label><input type="text" id="inputUser" class="liquid-input" placeholder="Seu nome de usuário"></div>
+      <div class="text-start mb-4"><label class="liquid-label">Senha</label><input type="password" id="inputPass" class="liquid-input" placeholder="Sua senha"></div>
+      <button class="liquid-btn-primary" id="btnLogin" onclick="fazerLogin()">Entrar no Painel</button>
+    </div>
+  </div>
+
+  <!-- APLICAÇÃO PRINCIPAL -->
+  <div id="appScreen" style="display: none;">
+    <div class="container px-3">
+      <div class="glass-appbar d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="apple-badge-icon"><span class="material-symbols-rounded fs-4">monitoring</span></div>
+          <div><h1 class="m-0 fs-6 fw-bold">Painel de Especialistas</h1><p class="m-0 text-muted" style="font-size:0.8rem">Olá, <b id="nomePecLogado"></b></p></div>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <div><select id="selectComponenteDash" class="apple-select-pill" onchange="carregarDados()"></select></div>
+          <button class="btn-apple-refresh" onclick="carregarDados()"><span class="material-symbols-rounded align-middle fs-6">refresh</span> Atualizar</button>
+          <img src="logo-ure.png" alt="Logo URE" class="ure-logo ms-1" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+
+    <div class="container" style="max-width: 1020px;">
+      
+      <!-- MENU DE ABAS -->
+      <div class="text-center mb-4">
+        <div class="liquid-segmented">
+          <button id="btnAbaEscola" class="nav-active" onclick="mudarAba('escolas')"><span class="material-symbols-rounded fs-6">list</span> Lista</button>
+          <button id="btnAbaKanban" onclick="mudarAba('kanban')"><span class="material-symbols-rounded fs-6">view_kanban</span> Kanban</button>
+          <button id="btnAbaTurno" onclick="mudarAba('turnos')"><span class="material-symbols-rounded fs-6">checklist</span> Por Turno</button>
+          <button id="btnAbaConsolidado" onclick="mudarAba('consolidado')"><span class="material-symbols-rounded fs-6">table_chart</span> Consolidado</button>
+          <button id="btnAbaAnalytics" onclick="mudarAba('analytics')"><span class="material-symbols-rounded fs-6">insights</span> Analytics</button>
+          <button id="btnAbaDeclaracoes" onclick="mudarAba('declaracoes')"><span class="material-symbols-rounded fs-6">description</span> Declarações</button>
+          <button id="btnAbaLogs" onclick="mudarAba('logs')"><span class="material-symbols-rounded fs-6">history</span> Logs</button>
+        </div>
+      </div>
+
+      <div id="loadingScreen" class="text-center py-5" style="display:none;"><div class="spinner-border text-primary"></div><h6 class="mt-3 text-muted">Carregando métricas da rede...</h6></div>
+
+      <div id="dashboardContent">
+        <!-- Top KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-title text-danger">Inscrições Pendentes</div><div class="kpi-value text-danger" id="kpiPendentes">0</div></div>
+          <div class="kpi-card"><div class="kpi-title text-primary">Total Indicados</div><div class="kpi-value text-primary" id="kpiIndicados">0</div></div>
+          <div class="kpi-card"><div class="kpi-title text-success">Presentes</div><div class="kpi-value text-success" id="kpiPresentes">0</div></div>
+          <div class="kpi-card"><div class="kpi-title text-danger">Faltas</div><div class="kpi-value text-danger" id="kpiFaltas">0</div></div>
+        </div>
+
+        <div id="viewEscolas">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <input type="text" id="inputPesquisaEscola" class="form-control rounded-pill px-4 py-2 glass-panel border-0 w-100 me-3" placeholder="Pesquisar unidade escolar..." onkeyup="filtrarEscolas()">
+            <button id="btnLembretes" class="btn btn-outline-danger rounded-pill px-4 py-2 fw-bold flex-shrink-0" style="display: none;" onclick="dispararLembretes()">
+              <span class="material-symbols-rounded align-middle fs-6 me-1">notifications_active</span> Cobrar Pendentes
+            </button>
+          </div>
+          <div id="listaEscolas"></div>
+        </div>
+
+        <div id="viewKanban" style="display: none;">
+          <div class="row g-4">
+            <div class="col-md-4"><div class="glass-panel p-3" style="background: rgba(239, 68, 68, 0.05); border-color: rgba(239, 68, 68, 0.2);"><h6 class="fw-bold text-danger mb-3 d-flex align-items-center gap-2"><span class="material-symbols-rounded">pending_actions</span> Não Iniciadas (<span id="kbCountNao">0</span>)</h6><div id="kbColNao" class="d-flex flex-column gap-2" style="min-height: 200px;"></div></div></div>
+            <div class="col-md-4"><div class="glass-panel p-3" style="background: rgba(0, 113, 227, 0.05); border-color: rgba(0, 113, 227, 0.2);"><h6 class="fw-bold text-primary mb-3 d-flex align-items-center gap-2"><span class="material-symbols-rounded">timelapse</span> Parciais (<span id="kbCountParcial">0</span>)</h6><div id="kbColParcial" class="d-flex flex-column gap-2" style="min-height: 200px;"></div></div></div>
+            <div class="col-md-4"><div class="glass-panel p-3" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);"><h6 class="fw-bold text-success mb-3 d-flex align-items-center gap-2"><span class="material-symbols-rounded">task_alt</span> Concluídas (<span id="kbCountConcluida">0</span>)</h6><div id="kbColConcluida" class="d-flex flex-column gap-2" style="min-height: 200px;"></div></div></div>
+          </div>
+        </div>
+
+        <div id="viewTurnos" style="display: none;">
+          <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 py-2 fw-bold" onclick="exportarEfetivoGeral()"><span class="material-symbols-rounded align-middle fs-6 me-1">badge</span> Baixar Lista (CSV)</button>
+          </div>
+          <div id="listaTurnos"></div>
+        </div>
+
+        <div id="viewConsolidado" style="display: none;">
+          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2"><div><h5 class="fw-bold m-0">Balanço Regional Consolidado</h5><small class="text-muted">Totalização estratificada por polos territoriais e áreas.</small></div><button class="btn btn-sm btn-outline-success rounded-pill px-3 py-2 fw-bold" onclick="exportarRelatorioConsolidado()"><span class="material-symbols-rounded align-middle fs-6 me-1">download</span> Baixar Consolidado (CSV)</button></div>
+          <h6 class="fw-bold text-muted mb-3 d-flex align-items-center gap-2" style="font-size:0.85rem;"><span class="material-symbols-rounded text-primary fs-5">location_city</span> TOTALIZAÇÃO POR POLO REGIONAL</h6>
+          <div class="row g-3 mb-4" id="cardsPolosGrid"></div>
+          <div class="glass-panel p-3 mb-5"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light bg-transparent"><tr><th>Polo</th><th class="text-center">Ativos</th><th class="text-center">Indicados</th><th class="text-center">Pendentes</th><th class="text-center text-success">Presentes</th><th class="text-center text-danger">Faltas</th><th class="text-center">Presença</th></tr></thead><tbody id="tabelaConsolidadoPolos"></tbody></table></div></div>
+          <h6 class="fw-bold text-muted mb-3 d-flex align-items-center gap-2" style="font-size:0.85rem;"><span class="material-symbols-rounded text-primary fs-5">menu_book</span> TOTALIZAÇÃO POR COMPONENTE CURRICULAR</h6>
+          <div class="glass-panel p-3"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead class="table-light bg-transparent"><tr><th>Componente</th><th class="text-center">Ativos</th><th class="text-center">Indicados</th><th class="text-center">Pendentes</th><th class="text-center text-success">Presentes</th><th class="text-center text-danger">Faltas</th><th class="text-center">Presença</th></tr></thead><tbody id="tabelaConsolidadoComponentes"></tbody></table></div></div>
+        </div>
+
+        <div id="viewAnalytics" style="display: none;">
+          <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6"><div class="glass-panel text-center p-3"><span class="material-symbols-rounded text-success fs-3">verified</span><div class="kpi-title mt-1">Taxa de Presença</div><h3 class="fw-bold text-success m-0" id="anTaxaPresenca">0%</h3></div></div>
+            <div class="col-md-3 col-6"><div class="glass-panel text-center p-3"><span class="material-symbols-rounded text-danger fs-3">person_cancel</span><div class="kpi-title mt-1">Absenteísmo (No-Show)</div><h3 class="fw-bold text-danger m-0" id="anTaxaFalta">0%</h3></div></div>
+            <div class="col-md-3 col-6"><div class="glass-panel text-center p-3"><span class="material-symbols-rounded text-primary fs-3">apartment</span><div class="kpi-title mt-1">Adesão Escolar</div><h3 class="fw-bold text-primary m-0" id="anAdesaoEscolas">0%</h3></div></div>
+            <div class="col-md-3 col-6"><div class="glass-panel text-center p-3"><span class="material-symbols-rounded text-secondary fs-3">block</span><div class="kpi-title mt-1">Afastados</div><h3 class="fw-bold text-secondary m-0" id="anAfastados">0</h3></div></div>
+          </div>
+          <div class="row g-4 mb-4">
+            <div class="col-md-6"><div class="glass-panel p-4"><h6 class="fw-bold mb-3 d-flex align-items-center gap-2"><span class="material-symbols-rounded text-primary">pie_chart</span> Balanço de Frequência</h6><div style="position: relative; height: 260px;"><canvas id="chartFrequencia"></canvas></div></div></div>
+            <div class="col-md-6"><div class="glass-panel p-4"><h6 class="fw-bold mb-3 d-flex align-items-center gap-2"><span class="material-symbols-rounded text-primary">donut_large</span> Engajamento das Unidades</h6><div style="position: relative; height: 260px;"><canvas id="chartEscolasStatus"></canvas></div></div></div>
+          </div>
+        </div>
+
+        <div id="viewDeclaracoes" style="display: none;">
+          <div class="glass-panel p-4 mb-4">
+            <h5 class="fw-bold text-primary mb-1 d-flex align-items-center gap-2"><span class="material-symbols-rounded">description</span> Emissão de Declarações</h5>
+            <p class="text-muted mb-4" style="font-size:0.85rem;">Gere automaticamente declarações em PDF no formato oficial da Diretoria de Ensino.</p>
+            <div class="row g-3 mb-4">
+              <div class="col-md-8"><label class="liquid-label">Endereço Completo do Local da Formação</label><input type="text" id="inputLocalDec" class="liquid-input" placeholder="Ex: EE Prof. Leopoldo José de Sant'Anna, localizada na Rua José..."></div>
+              <div class="col-md-4"><label class="liquid-label">Data da Emissão</label><input type="date" id="inputDataDec" class="liquid-input"></div>
+            </div>
+            <input type="text" id="inputPesquisaDec" class="form-control rounded-pill px-4 py-2 mb-4 border-0" style="background: rgba(255,255,255,0.8); box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);" placeholder="Pesquisar professor pelo nome ou RG..." onkeyup="filtrarDeclaracoes()">
+            <div id="listaDeclaracoes" class="d-flex flex-column gap-2"></div>
+          </div>
+        </div>
+
+        <div id="viewLogs" style="display: none;">
+          <div class="glass-panel p-4">
+            <h5 class="fw-bold mb-1 d-flex align-items-center gap-2 text-primary"><span class="material-symbols-rounded">history</span> Registro de Atividades (Auditoria)</h5>
+            <div id="tabelaLogsContainer" class="table-responsive mt-4">
+              <table class="table table-hover align-middle mb-0" style="font-size:0.85rem;">
+                <thead class="table-light bg-transparent"><tr><th>Data/Hora</th><th>Usuário / Escola</th><th>Ação</th><th>Detalhes</th></tr></thead>
+                <tbody id="tabelaLogs"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE DETALHES DA ESCOLA -->
+  <div class="modal-overlay" id="modalEscola">
+    <div class="modal-content-apple">
+      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3"><h5 class="fw-bold m-0 text-primary" id="modalTituloEscolaDetalhe">Escola</h5><button class="btn-close shadow-none" onclick="fecharModal()"></button></div>
+      <div id="modalConteudoEscola" style="overflow-y: auto; flex-grow: 1; padding-right: 5px;"></div>
+      <div class="pt-3 border-top mt-2"><button class="btn btn-primary w-100 rounded-pill py-2 fw-bold" onclick="fecharModal()">Fechar</button></div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CHAMADA -->
+  <div class="modal-overlay" id="modalFreq">
+    <div class="modal-content-apple">
+      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3"><h5 class="fw-bold m-0 text-primary" id="modalTituloTurno">Turno</h5><button class="btn-close shadow-none" onclick="fecharModal()"></button></div>
+      <div class="list-group list-group-flush" id="modalListaPresenca"></div>
+      <div class="pt-3 border-top mt-2"><button class="btn btn-primary w-100 rounded-pill py-2 fw-bold" onclick="fecharModal()">Salvar e Voltar</button></div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIGURAR LISTA DE PRESENÇA -->
+  <div class="modal-overlay" id="modalConfigLista">
+    <div class="modal-content-apple" style="max-width: 650px;">
+      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3">
+        <h5 class="fw-bold m-0 text-primary">Imprimir Lista de Presença</h5>
+        <button class="btn-close shadow-none" onclick="fecharModalLista()"></button>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-12">
+          <label class="liquid-label">Título da Formação</label>
+          <input type="text" id="listaTituloInput" class="liquid-input" placeholder="Ex: 1ª Orientação Técnica Projeto...">
+        </div>
+        <div class="col-md-12">
+          <label class="liquid-label">Público-alvo</label>
+          <input type="text" id="listaPublicoInput" class="liquid-input" placeholder="Ex: Todos os Professores atuantes no Projeto...">
+        </div>
+        <div class="col-md-4">
+          <label class="liquid-label">Data</label>
+          <input type="date" id="listaData" class="liquid-input">
+        </div>
+        <div class="col-md-4">
+          <label class="liquid-label">Horário</label>
+          <input type="text" id="listaHorario" class="liquid-input" placeholder="Ex: das 8h às 14h">
+        </div>
+        <div class="col-md-4">
+          <label class="liquid-label">Cidade</label>
+          <input type="text" id="listaCidadeInput" class="liquid-input" placeholder="Ex: Praia Grande">
+        </div>
+        <div class="col-md-6">
+          <label class="liquid-label">Local (Nome da Escola)</label>
+          <input type="text" id="listaLocal" class="liquid-input" placeholder="Ex: EE Profa. Silvia Jorge Pollastrini">
+        </div>
+        <div class="col-md-6">
+          <label class="liquid-label">Endereço do Local</label>
+          <input type="text" id="listaEndereco" class="liquid-input" placeholder="Ex: Rua Professora Alice T C Saraiva, 32...">
+        </div>
+      </div>
+      <div class="pt-3 border-top mt-4">
+        <button class="btn btn-primary w-100 rounded-pill py-2 fw-bold d-flex align-items-center justify-content-center gap-2" onclick="imprimirListaDefinitiva()">
+          <span class="material-symbols-rounded">print</span> Gerar e Imprimir Lista
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÁREAS DE IMPRESSÃO - FORA DO FLUXO VISUAL -->
+  <div id="printArea">
+    <div class="print-border">
+      <table class="print-header-table">
+        <tr>
+          <td style="width: 20%; text-align: left;"><img src="logo-sp.png" class="print-logo-sp" alt="Governo SP"></td>
+          <td style="width: 60%; text-align: center;" class="print-header-text"><strong>GOVERNO DO ESTADO DE SÃO PAULO</strong><br><strong>SECRETARIA DE ESTADO DA EDUCAÇÃO</strong><br>UNIDADE REGIONAL DE ENSINO<br>REGIÃO SÃO VICENTE<br><br><span style="font-size: 0.8rem;">Rua João Ramalho, 378 – Centro – São Vicente/SP – Tel.: (13) 3569-1800</span></td>
+          <td style="width: 20%; text-align: right;"><img src="logo-ure.png" class="print-logo-ure" alt="URE São Vicente"></td>
+        </tr>
+      </table>
+      <div class="print-title">DECLARAÇÃO</div>
+      <div class="print-body">
+        <p class="print-indent">Declaramos, para os devidos fins, que o(a) Sr.(a) <span id="printNome" style="border-bottom: 1px solid #000; padding: 0 10px;"></span>, RG/CIN <span id="printRg" style="border-bottom: 1px solid #000; padding: 0 10px;"></span>, compareceu, na data de hoje, no período <span id="printTurno"></span>, à <span id="printLocal"></span> para participar da Formação de <span id="printComp"></span>.</p>
+        <p class="print-indent">Por ser expressão da verdade, firmamos a presente declaração para os fins que se fizerem necessários.</p>
+      </div>
+      <div class="print-footer">São Vicente, <span id="printData"></span>.</div>
+    </div>
+  </div>
+
+  <div id="printListaArea"></div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbw6gY49y19b-L6-90Ad7-RpJVdF-mZEPilE49RdH8ufMq7kkKVIlUS3xSZ57_4d9HMQ/exec";
+
+    let dadosCache = null;
+    let chartFreqInstance = null, chartEscolasInstance = null, chartTurnosInstance = null;
+    let nomeEspecialistaAtivo = "";
+    let usuarioAtivoLogin = "";
+    let todosProfessoresCache = [];
+    let turnoSelecionadoParaLista = null; 
+
+    function fazerLogin() {
+      let u = document.getElementById('inputUser').value.trim();
+      let p = document.getElementById('inputPass').value.trim();
+      let btn = document.getElementById('btnLogin');
+      let msg = document.getElementById('mensagemLogin');
+      
+      if(!u || !p) { msg.innerHTML = 'Preencha usuário e senha.'; msg.style.display = 'flex'; return; }
+      btn.innerText = "Autenticando..."; btn.disabled = true; msg.style.display = 'none';
+
+      fetch(API_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'loginPec', usuario: u, senha: p })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if(res.sucesso) {
+          nomeEspecialistaAtivo = res.nome;
+          usuarioAtivoLogin = res.usuario;
+          document.getElementById('nomePecLogado').innerText = nomeEspecialistaAtivo;
+          
+          let isCec = usuarioAtivoLogin.toLowerCase() === 'cec' || nomeEspecialistaAtivo.toLowerCase().includes('cec') || nomeEspecialistaAtivo.toLowerCase().includes('renan');
+          document.getElementById('btnLembretes').style.display = isCec ? 'inline-flex' : 'none';
+
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('appScreen').style.display = 'block';
+          iniciarPainel();
+        } else {
+          msg.innerHTML = res.mensagem; msg.style.display = 'flex';
+          btn.innerText = "Entrar no Painel"; btn.disabled = false;
+        }
+      }).catch(e => {
+        msg.innerHTML = 'Falha na conexão.'; msg.style.display = 'flex';
+        btn.innerText = "Entrar no Painel"; btn.disabled = false;
+      });
+    }
+
+    function dispararLembretes() {
+      if(!confirm("Deseja disparar um e-mail de cobrança automatizado para TODAS as escolas que estão com status 'Não Iniciado' ou 'Parcial'?")) return;
+      let btn = document.getElementById('btnLembretes'); let textoOriginal = btn.innerHTML;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Enviando...'; btn.disabled = true;
+      let filtroAtual = document.getElementById('selectComponenteDash').value;
+
+      fetch(API_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'dispararLembretes', pecLogado: nomeEspecialistaAtivo, componente: filtroAtual })
+      })
+      .then(res => res.json())
+      .then(res => {
+        btn.innerHTML = textoOriginal; btn.disabled = false;
+        if(res.sucesso) { alert(`Sucesso! E-mails enviados para ${res.enviadas} escola(s).`); carregarLogs(); } 
+        else { alert('Aviso: ' + res.mensagem); }
+      }).catch(() => { alert('Erro de conexão ao tentar enviar lembretes.'); btn.innerHTML = textoOriginal; btn.disabled = false; });
+    }
+
+    function iniciarPainel() { 
+      fetch(`${API_URL}?action=getComponentes`)
+        .then(res => res.json())
+        .then(c => {
+          let sel = document.getElementById('selectComponenteDash');
+          sel.innerHTML = '<option value="Todos">Visão Geral (Todos os Componentes)</option>';
+          c.forEach(comp => sel.innerHTML += `<option value="${comp.nome}">${comp.nome}</option>`);
+          carregarDados(); 
+        }).catch(() => alert("Falha ao carregar as opções de formações no painel."));
+    }
+
+    function carregarDados() {
+      document.getElementById('dashboardContent').style.display = 'none'; document.getElementById('loadingScreen').style.display = 'block';
+      let filtroAtual = document.getElementById('selectComponenteDash').value;
+      fetch(`${API_URL}?action=getDashboard&componente=${encodeURIComponent(filtroAtual)}`)
+        .then(res => res.json())
+        .then(dados => { 
+          if(dados.erro) { alert("Erro reportado pelo sistema: " + dados.mensagem); document.getElementById('loadingScreen').style.display = 'none'; return; }
+          renderizarPainel(dados); 
+        }).catch(() => { alert("Falha de conexão com o banco de dados. Atualize a página."); document.getElementById('loadingScreen').style.display = 'none'; });
+    }
+
+    function renderizarPainel(dados) {
+      dadosCache = dados;
+      document.getElementById('kpiPendentes').innerText = dados.kpis.pendentes;
+      document.getElementById('kpiIndicados').innerText = dados.kpis.indicados;
+      document.getElementById('kpiPresentes').innerText = dados.kpis.presentes;
+      document.getElementById('kpiFaltas').innerText = dados.kpis.faltas;
+
+      renderizarEscolas(dadosCache.escolas); renderizarKanban(dadosCache.escolas);
+      renderizarTurnos(dadosCache.turnos); renderizarConsolidado(dadosCache);
+      
+      document.getElementById('loadingScreen').style.display = 'none'; document.getElementById('dashboardContent').style.display = 'block';
+
+      let abaAtiva = 'escolas';
+      let btnTurno = document.getElementById('btnAbaTurno'); let btnConsolidado = document.getElementById('btnAbaConsolidado');
+      let btnAnalytics = document.getElementById('btnAbaAnalytics'); let btnLogs = document.getElementById('btnAbaLogs');
+      let btnKanban = document.getElementById('btnAbaKanban'); let btnDec = document.getElementById('btnAbaDeclaracoes');
+
+      if(btnTurno && btnTurno.classList.contains('nav-active')) abaAtiva = 'turnos';
+      else if(btnConsolidado && btnConsolidado.classList.contains('nav-active')) abaAtiva = 'consolidado';
+      else if(btnAnalytics && btnAnalytics.classList.contains('nav-active')) abaAtiva = 'analytics';
+      else if(btnLogs && btnLogs.classList.contains('nav-active')) abaAtiva = 'logs';
+      else if(btnKanban && btnKanban.classList.contains('nav-active')) abaAtiva = 'kanban';
+      else if(btnDec && btnDec.classList.contains('nav-active')) abaAtiva = 'declaracoes';
+
+      mudarAba(abaAtiva);
+    }
+
+    function mudarAba(aba) {
+      ['Escola', 'Turno', 'Consolidado', 'Analytics', 'Logs', 'Kanban', 'Declaracoes'].forEach(tab => {
+        let btn = document.getElementById(`btnAba${tab}`);
+        if(btn) btn.className = (aba.toLowerCase() === tab.toLowerCase() || (aba==='escolas'&&tab==='Escola') || (aba==='turnos'&&tab==='Turno') || (aba==='declaracoes'&&tab==='Declaracoes')) ? 'nav-active' : '';
+      });
+
+      document.getElementById('viewEscolas').style.display = (aba === 'escolas') ? 'block' : 'none';
+      document.getElementById('viewKanban').style.display = (aba === 'kanban') ? 'block' : 'none';
+      document.getElementById('viewTurnos').style.display = (aba === 'turnos') ? 'block' : 'none';
+      document.getElementById('viewConsolidado').style.display = (aba === 'consolidado') ? 'block' : 'none';
+      document.getElementById('viewAnalytics').style.display = (aba === 'analytics') ? 'block' : 'none';
+      document.getElementById('viewLogs').style.display = (aba === 'logs') ? 'block' : 'none';
+      document.getElementById('viewDeclaracoes').style.display = (aba === 'declaracoes') ? 'block' : 'none';
+
+      if (aba === 'analytics') renderizarAnalytics(dadosCache);
+      if (aba === 'consolidado') renderizarConsolidado(dadosCache);
+      if (aba === 'logs') carregarLogs();
+      if (aba === 'declaracoes') renderizarDeclaracoes();
+    }
+
+    function renderizarDeclaracoes() {
+      todosProfessoresCache = [];
+      if(dadosCache && dadosCache.turnos) {
+        dadosCache.turnos.forEach(t => {
+          t.professores.forEach(p => {
+            todosProfessoresCache.push({ nome: p.nome.replace(" (Adicionado pela escola)", ""), rg: p.rg || "______________________", cpf: p.cpf || "Não informado", comp: t.comp, turno: t.turno });
+          });
+        });
+      }
+      todosProfessoresCache.sort((a,b) => a.nome.localeCompare(b.nome));
+      document.getElementById('inputDataDec').valueAsDate = new Date();
+      exibirListaDeclaracoes(todosProfessoresCache);
+    }
+
+    function exibirListaDeclaracoes(lista) {
+      let div = document.getElementById('listaDeclaracoes'); div.innerHTML = '';
+      if(lista.length === 0) { div.innerHTML = '<div class="alert alert-secondary rounded-4">Nenhum professor indicado encontrado.</div>'; return; }
+      lista.forEach(p => {
+        let nomeSafe = p.nome.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        div.innerHTML += `
+          <div class="glass-panel p-3 d-flex justify-content-between align-items-center">
+            <div><div class="fw-bold" style="font-size:0.95rem;">${p.nome}</div><div class="text-muted mt-1" style="font-size:0.75rem;">RG: ${p.rg.replace(/_/g, "Não inf.")} | CPF: ${p.cpf} | ${p.turno}</div></div>
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold" onclick="imprimirDeclaracao('${nomeSafe}', '${p.rg}', '${p.comp}', '${p.turno}')"><span class="material-symbols-rounded align-middle fs-6 me-1">print</span> Imprimir</button>
+          </div>`;
+      });
+    }
+
+    function filtrarDeclaracoes() {
+      let termo = document.getElementById('inputPesquisaDec').value.toLowerCase();
+      let filtrados = todosProfessoresCache.filter(p => p.nome.toLowerCase().includes(termo) || p.rg.toLowerCase().includes(termo));
+      exibirListaDeclaracoes(filtrados);
+    }
+
+    function imprimirDeclaracao(nome, rg, comp, turno) {
+      let local = document.getElementById('inputLocalDec').value.trim();
+      if(!local) { alert("Por favor, digite o 'Endereço Completo do Local da Formação' para gerar a declaração."); document.getElementById('inputLocalDec').focus(); return; }
+      
+      let turnoMinusculo = turno.toLowerCase(); let turnoTexto = "integral";
+      if(turnoMinusculo.includes('manhã')) turnoTexto = "da manhã";
+      else if(turnoMinusculo.includes('tarde')) turnoTexto = "da tarde";
+      else if(turnoMinusculo.includes('noite')) turnoTexto = "da noite";
+
+      let dataInput = document.getElementById('inputDataDec').value; let partesData = dataInput.split('-');
+      let meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+      let dataExtenso = `${partesData[2]} de ${meses[parseInt(partesData[1]) - 1]} de ${partesData[0]}`;
+
+      document.getElementById('printNome').innerText = nome; document.getElementById('printRg').innerText = rg;
+      document.getElementById('printComp').innerText = comp; document.getElementById('printTurno').innerText = turnoTexto;
+      document.getElementById('printLocal').innerText = local; document.getElementById('printData').innerText = dataExtenso;
+      
+      document.body.classList.add('print-mode-dec');
+      window.print();
+      document.body.classList.remove('print-mode-dec');
+    }
+
+    function excluirIndicacao(linha, nomeProf) {
+      if(!confirm(`Atenção: Tem certeza que deseja EXCLUIR a indicação de ${nomeProf}?\nOs dados serão apagados e a escola precisará indicar novamente.`)) return;
+      fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'excluirIndicacao', linha: linha, nomeProf: nomeProf, pecLogado: nomeEspecialistaAtivo }) })
+      .then(res => res.json())
+      .then(res => { if(res.sucesso) { alert('Indicação excluída com sucesso!'); fecharModal(); } else { alert('Erro ao tentar excluir: ' + res.mensagem); } })
+      .catch(() => alert('Erro de conexão ao tentar excluir.'));
+    }
+
+    function renderizarKanban(escolas) {
+      let colNao = document.getElementById('kbColNao'); let colParcial = document.getElementById('kbColParcial'); let colConcluida = document.getElementById('kbColConcluida');
+      colNao.innerHTML = ''; colParcial.innerHTML = ''; colConcluida.innerHTML = ''; let countNao = 0, countParcial = 0, countConcluida = 0;
+      if(!escolas || escolas.length === 0) return;
+      escolas.forEach((esc, idx) => {
+        let cardHtml = `<div class="glass-panel p-3 shadow-sm kanban-card" onclick="abrirModalEscola(${idx})"><div class="fw-bold mb-2" style="font-size: 0.85rem; line-height: 1.2;">${esc.escola}</div><div class="d-flex justify-content-between align-items-center text-muted" style="font-size: 0.75rem;"><span><span class="material-symbols-rounded align-middle" style="font-size: 1rem;">person</span> ${esc.indicados}/${esc.total} ind.</span>${esc.faltam > 0 ? `<span class="text-danger fw-bold">${esc.faltam} faltam</span>` : `<span class="text-success fw-bold">100%</span>`}</div></div>`;
+        if(esc.status === 'Não Iniciado') { colNao.innerHTML += cardHtml; countNao++; } 
+        else if(esc.status === 'Parcial') { colParcial.innerHTML += cardHtml; countParcial++; } 
+        else if(esc.status === 'Concluído') { colConcluida.innerHTML += cardHtml; countConcluida++; }
+      });
+      document.getElementById('kbCountNao').innerText = countNao; document.getElementById('kbCountParcial').innerText = countParcial; document.getElementById('kbCountConcluida').innerText = countConcluida;
+    }
+
+    function carregarLogs() {
+      let tb = document.getElementById('tabelaLogs'); tb.innerHTML = '<tr><td colspan="4" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm"></div> Buscando histórico...</td></tr>';
+      fetch(`${API_URL}?action=getLogs`).then(res => res.json()).then(logs => {
+          tb.innerHTML = ''; if(logs.length === 0) { tb.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nenhum registro encontrado.</td></tr>'; return; }
+          logs.forEach(l => {
+            let badgeColor = l.acao === "Chamada" ? "apple-badge-green" : (l.acao === "Login" ? "apple-badge-gray" : (l.acao === "Exclusão" ? "apple-badge-red" : "apple-badge-blue"));
+            tb.innerHTML += `<tr><td class="text-muted" style="white-space:nowrap;">${l.data}</td><td class="fw-bold">${l.usuario}</td><td><span class="apple-badge ${badgeColor}" style="font-size:0.75rem;">${l.acao}</span></td><td>${l.detalhes}</td></tr>`;
+          });
+        });
+    }
+
+    function renderizarEscolas(escolas) {
+      let div = document.getElementById('listaEscolas'); div.innerHTML = '';
+      if(escolas.length === 0) { div.innerHTML = '<div class="alert alert-secondary rounded-4">Nenhum dado encontrado.</div>'; return; }
+      escolas.forEach((esc, idx) => {
+        let corProgresso = esc.percentual === 100 ? '#10b981' : '#0071e3';
+        let statusBadge = esc.faltam > 0 ? `<span class="text-danger fw-bold" style="font-size:0.82rem">${esc.faltam} pendente(s)</span>` : `<span class="apple-badge apple-badge-green"><span class="material-symbols-rounded align-middle fs-6 me-1">check</span> Concluído</span>`;
+        div.innerHTML += `
+          <div class="glass-panel p-3 px-4 mb-3">
+            <div class="row align-items-center">
+              <div class="col-md-5 mb-2 mb-md-0"><h6 class="fw-bold mb-1">${esc.escola}</h6>${esc.afastados > 0 ? `<small class="text-muted"><span class="material-symbols-rounded align-middle fs-6">person_off</span> ${esc.afastados} afastado(s)</small>` : ''}</div>
+              <div class="col-md-4 text-center"><div class="d-flex justify-content-between text-muted" style="font-size: 0.78rem;"><span>${esc.indicados} indicados</span><span>${esc.total} ativos</span></div><div class="prog-bg"><div class="prog-fill" style="width: ${esc.percentual}%; background-color: ${corProgresso};"></div></div></div>
+              <div class="col-md-3 text-md-end d-flex flex-column align-items-md-end gap-1 mt-2 mt-md-0">${statusBadge}<button class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-bold mt-1" onclick="abrirModalEscola(${idx})">Ver Detalhes</button></div>
+            </div>
+          </div>`;
+      });
+    }
+
+    function filtrarEscolas() { let termo = document.getElementById('inputPesquisaEscola').value.toLowerCase(); renderizarEscolas(dadosCache.escolas.filter(e => e.escola.toLowerCase().includes(termo))); }
+
+    function renderizarTurnos(turnos) {
+      let div = document.getElementById('listaTurnos'); div.innerHTML = '';
+      if(turnos.length === 0) div.innerHTML = '<div class="alert alert-info rounded-4">Nenhum turno com inscrições nesta área.</div>';
+      turnos.forEach((t, idx) => {
+        div.innerHTML += `
+          <div class="glass-panel p-4 mb-3" style="border-left: 4px solid var(--apple-primary);">
+            <div class="row align-items-center">
+              <div class="col-md-5 mb-2 mb-md-0"><h5 class="fw-bold text-primary mb-1">${t.turno}</h5><small class="text-muted d-block"><span class="material-symbols-rounded align-middle fs-6">book</span> ${t.comp}</small><small class="text-muted d-block"><span class="material-symbols-rounded align-middle fs-6">groups</span> ${t.total} inscritos</small></div>
+              <div class="col-md-3 text-center mb-2 mb-md-0"><div class="d-flex justify-content-center gap-2"><span class="apple-badge apple-badge-green">Presentes: ${t.presentes}</span><span class="apple-badge apple-badge-red">Faltas: ${t.faltas}</span></div></div>
+              <div class="col-md-4 text-end d-flex flex-column gap-2 mt-3 mt-md-0">
+                <button class="btn btn-primary rounded-pill px-3 py-2 fw-bold" onclick="abrirModalTurno(${idx})">Fazer Chamada</button>
+                <div class="d-flex gap-2 justify-content-end">
+                  <button class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-bold flex-grow-1" onclick="exportarEfetivoTurno(${idx})"><span class="material-symbols-rounded align-middle fs-6">badge</span> Efetivo</button>
+                  <button class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 fw-bold flex-grow-1" onclick="abrirModalLista(${idx})"><span class="material-symbols-rounded align-middle fs-6">print</span> Lista PDF</button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      });
+    }
+
+    function abrirModalLista(idx) {
+      turnoSelecionadoParaLista = dadosCache.turnos[idx];
+      document.getElementById('listaTituloInput').value = turnoSelecionadoParaLista.comp; 
+      document.getElementById('listaData').valueAsDate = new Date();
+      document.getElementById('modalConfigLista').style.display = 'flex';
+    }
+
+    function fecharModalLista() { document.getElementById('modalConfigLista').style.display = 'none'; }
+
+    function imprimirListaDefinitiva() {
+      let t = turnoSelecionadoParaLista;
+      let titulo = document.getElementById('listaTituloInput').value.trim() || "Título não informado";
+      let publico = document.getElementById('listaPublicoInput').value.trim() || "Público-alvo não informado";
+      let horario = document.getElementById('listaHorario').value.trim() || "Horário não informado";
+      let cidade = document.getElementById('listaCidadeInput').value.trim() || "Não informada";
+      let local = document.getElementById('listaLocal').value.trim() || "Local não informado";
+      let endereco = document.getElementById('listaEndereco').value.trim() || "Endereço não informado";
+
+      let dataRaw = document.getElementById('listaData').value;
+      let dataExtenso = "Data não informada";
+      if(dataRaw) {
+        let partesData = dataRaw.split('-');
+        let meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+        dataExtenso = `${partesData[2]} de ${meses[parseInt(partesData[1]) - 1]} de ${partesData[0]}`;
+      }
+
+      let responsavel = nomeEspecialistaAtivo;
+      let professores = t.professores;
+      let chunks = [];
+      
+      for (let i = 0; i < professores.length; i += 13) { chunks.push(professores.slice(i, i + 13)); }
+      if (chunks.length === 0) chunks.push([]); 
+
+      let printContainer = document.getElementById('printListaArea');
+      printContainer.innerHTML = '';
+
+      chunks.forEach((chunk, pageIndex) => {
+        let pageHtml = `
+          <div class="print-page">
+            <table class="pl-header-table">
+              <tr>
+                <td style="width: 15%; text-align: left;"><img src="logo-sp.png" style="max-height: 70px;" alt="SP"></td>
+                <td style="width: 70%;" class="pl-header-text">
+                  <strong>Unidade Regional de Ensino de São Vicente – URE SVI</strong><br>
+                  SÃO VICENTE | PRAIA GRANDE | MONGAGUÁ | ITANHAÉM | PERUÍBE<br>
+                  Coord. Geral – Dirigente Regional de Ensino Erica Alves da Rocha<br>
+                  <span style="font-size: 9px;">Tel.: (13) 3569 – 1800 | Rua João Ramalho, 378, Centro – São Vicente/SP</span>
+                </td>
+                <td style="width: 15%; text-align: right;"><img src="logo-ure.png" style="max-height: 60px;" alt="URE"></td>
+              </tr>
+            </table>
+            
+            <div class="pl-title">LISTA DE PRESENÇA</div>
+            
+            <table class="pl-info-table">
+              <tr>
+                <td style="width: 50%;"><strong>Título:</strong> ${titulo}</td>
+                <td style="width: 25%;"><strong>Horário:</strong> ${horario}</td>
+                <td style="width: 25%;"><strong>Data:</strong> ${dataExtenso}</td>
+              </tr>
+              <tr>
+                <td><strong>Local:</strong> ${local}</td>
+                <td colspan="2"><strong>Público-alvo:</strong> ${publico}</td>
+              </tr>
+              <tr>
+                <td><strong>Endereço:</strong> ${endereco}</td>
+                <td colspan="2"><strong>Responsável:</strong> ${responsavel}</td>
+              </tr>
+            </table>
+
+            <table class="pl-main-table">
+              <thead>
+                <tr>
+                  <th style="width: 3%;"></th>
+                  <th style="width: 10%;">CIDADE</th>
+                  <th style="width: 17%;">UNIDADE ESCOLAR</th>
+                  <th style="width: 20%;">NOME COMPLETO</th>
+                  <th style="width: 9%;">RG</th>
+                  <th style="width: 9%;">CPF</th>
+                  <th style="width: 9%;">CONTA CORRENTE</th>
+                  <th style="width: 6%;">AGÊNCIA</th>
+                  <th style="width: 7%;">VALOR TRANSPORTE</th>
+                  <th style="width: 10%;">ASSINATURA</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        for (let i = 0; i < 13; i++) {
+          let globalIndex = (pageIndex * 13) + i + 1;
+          if (i < chunk.length) {
+            let p = chunk[i];
+            pageHtml += `<tr><td>${globalIndex}</td><td>${cidade}</td><td>${p.escola}</td><td style="text-align: left;">${p.nome.replace(" (Adicionado pela escola)", "")}</td><td>${p.rg || ""}</td><td>${p.cpf || ""}</td><td>${p.conta || ""}</td><td>${p.agencia || ""}</td><td></td><td></td></tr>`;
+          } else {
+             pageHtml += `<tr><td>${globalIndex}</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>`;
+          }
+        }
+
+        pageHtml += `</tbody></table></div>`;
+        if (pageIndex < chunks.length - 1) { pageHtml += `<div style="page-break-after: always; clear: both;"></div>`; }
+        printContainer.innerHTML += pageHtml;
+      });
+
+      document.body.classList.add('print-mode-lista');
+      window.print();
+      document.body.classList.remove('print-mode-lista');
+      fecharModalLista();
+    }
+
+    function renderizarConsolidado(dados) {
+      if(!dados) return;
+      let cardsPolos = document.getElementById('cardsPolosGrid'); let tbodyPolos = document.getElementById('tabelaConsolidadoPolos');
+      cardsPolos.innerHTML = ''; tbodyPolos.innerHTML = '';
+      if (dados.consolidadoPolos && dados.consolidadoPolos.length > 0) {
+        dados.consolidadoPolos.forEach(p => {
+          cardsPolos.innerHTML += `<div class="col-md-4"><div class="glass-panel p-3"><div class="d-flex justify-content-between align-items-center mb-2"><span class="apple-badge apple-badge-blue">${p.polo}</span><span class="text-muted" style="font-size:0.8rem;"><b>${p.taxaPresenca}%</b> Presença</span></div><div class="d-flex justify-content-between text-muted" style="font-size:0.82rem;"><span>Ativos:</span><strong class="text-dark">${p.total}</strong></div><div class="d-flex justify-content-between text-muted" style="font-size:0.82rem;"><span>Presentes / Faltas:</span><strong class="text-success">${p.presentes} <span class="text-muted">/</span> <span class="text-danger">${p.faltas}</span></strong></div><div class="d-flex justify-content-between text-muted" style="font-size:0.82rem;"><span>Pendentes:</span><strong class="text-danger">${p.pendentes}</strong></div></div></div>`;
+          tbodyPolos.innerHTML += `<tr><td class="fw-bold">${p.polo}</td><td class="text-center">${p.total}</td><td class="text-center text-primary fw-bold">${p.indicados}</td><td class="text-center text-danger fw-bold">${p.pendentes}</td><td class="text-center text-success fw-bold">${p.presentes}</td><td class="text-center text-danger fw-bold">${p.faltas}</td><td class="text-center fw-bold">${p.taxaPresenca}%</td></tr>`;
+        });
+      }
+      let tbodyComp = document.getElementById('tabelaConsolidadoComponentes'); tbodyComp.innerHTML = '';
+      if (dados.consolidadoComponentes && dados.consolidadoComponentes.length > 0) {
+        dados.consolidadoComponentes.forEach(c => {
+          tbodyComp.innerHTML += `<tr><td class="fw-bold">${c.componente}</td><td class="text-center">${c.total}</td><td class="text-center text-primary fw-bold">${c.indicados}</td><td class="text-center text-danger fw-bold">${c.pendentes}</td><td class="text-center text-success fw-bold">${c.presentes}</td><td class="text-center text-danger fw-bold">${c.faltas}</td><td class="text-center fw-bold">${c.taxaPresenca}%</td></tr>`;
+        });
+      }
+    }
+
+    function exportarRelatorioConsolidado() {
+      if (!dadosCache) return;
+      let csvContent = "\uFEFF--- CONSOLIDADO POR POLO REGIONAL ---\nPolo;Total Ativos;Indicados;Pendentes;Presentes;Faltas;Taxa Presenca (%)\n";
+      dadosCache.consolidadoPolos.forEach(p => csvContent += `"${p.polo}";${p.total};${p.indicados};${p.pendentes};${p.presentes};${p.faltas};"${p.taxaPresenca}%"\n`);
+      csvContent += "\n--- CONSOLIDADO POR COMPONENTE CURRICULAR ---\nComponente;Total Ativos;Indicados;Pendentes;Presentes;Faltas;Taxa Presenca (%)\n";
+      dadosCache.consolidadoComponentes.forEach(c => csvContent += `"${c.componente}";${c.total};${c.indicados};${c.pendentes};${c.presentes};${c.faltas};"${c.taxaPresenca}%"\n`);
+      let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }); let link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `Relatorio_Consolidado_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.csv`; link.click();
+    }
+
+    function abrirModalEscola(idx) {
+      let escola = dadosCache.escolas[idx];
+      document.getElementById('modalTituloEscolaDetalhe').innerText = escola.escola;
+      let html = '';
+      if(escola.responsavel) { html += `<div class="p-3 rounded-4 mb-3" style="background: rgba(0, 113, 227, 0.08);"><small class="text-muted d-block" style="font-size:0.75rem;">Responsável:</small><b>${escola.responsavel}</b></div>`; }
+      if(escola.listaIndicados.length > 0) {
+        html += `<h6 class="fw-bold text-success mb-2">Professores Indicados (${escola.listaIndicados.length})</h6><div class="list-group list-group-flush mb-3">`;
+        escola.listaIndicados.forEach(p => {
+          let badgeTag = p.nome.includes("(Adicionado") ? `<span class="badge bg-warning text-dark ms-2" style="font-size:0.6rem;">Incluído Manualmente</span>` : "";
+          let nomeSafe = p.nome.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+          html += `<div class="list-group-item bg-transparent px-0 py-2 d-flex justify-content-between align-items-center"><div><b>${p.nome}</b> ${badgeTag} <small class="text-muted d-block">${p.comp}</small></div><div class="d-flex align-items-center gap-2"><span class="apple-badge apple-badge-blue">${p.turno}</span><button class="btn btn-sm btn-outline-danger rounded-circle p-1 d-flex align-items-center justify-content-center" onclick="excluirIndicacao(${p.linha}, '${nomeSafe}')" title="Excluir Indicação" style="border:none;"><span class="material-symbols-rounded" style="font-size: 1.1rem;">delete</span></button></div></div>`;
+        });
+        html += '</div>';
+      }
+      if(escola.listaPendentes.length > 0) {
+        html += `<h6 class="fw-bold text-danger mb-2">Pendentes (${escola.listaPendentes.length})</h6><div class="list-group list-group-flush mb-3">`;
+        escola.listaPendentes.forEach(p => { html += `<div class="list-group-item bg-transparent px-0 py-2"><b>${p.nome}</b><small class="text-muted d-block">${p.comp}</small></div>`; });
+        html += '</div>';
+      }
+      if(escola.listaAfastados && escola.listaAfastados.length > 0) {
+        html += `<h6 class="fw-bold text-secondary mb-2">Afastados (${escola.listaAfastados.length})</h6><div class="list-group list-group-flush mb-3">`;
+        escola.listaAfastados.forEach(p => {
+          let nomeSafe = p.nome.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+          html += `<div class="list-group-item bg-transparent px-0 py-2 d-flex justify-content-between align-items-center"><div class="text-muted"><span>${p.nome}</span><small class="d-block">${p.comp}</small></div><button class="btn btn-sm btn-outline-danger rounded-circle p-1 d-flex align-items-center justify-content-center" onclick="excluirIndicacao(${p.linha}, '${nomeSafe}')" title="Excluir Indicação" style="border:none;"><span class="material-symbols-rounded" style="font-size: 1.1rem;">delete</span></button></div>`;
+        });
+        html += '</div>';
+      }
+      document.getElementById('modalConteudoEscola').innerHTML = html; document.getElementById('modalEscola').style.display = 'flex';
+    }
+
+    function abrirModalTurno(idx) {
+      let turno = dadosCache.turnos[idx];
+      document.getElementById('modalTituloTurno').innerText = turno.turno;
+      let html = '';
+      turno.professores.forEach(prof => {
+        let btnP = prof.presenca === 'Presente' ? 'btn-presente' : 'btn-neutro';
+        let btnF = prof.presenca === 'Falta' ? 'btn-falta' : 'btn-neutro';
+        let isManual = prof.nome.includes("(Adicionado");
+        let nomeSafe = prof.nome.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        html += `
+          <div class="list-group-item bg-transparent px-0 py-3 d-flex justify-content-between align-items-center border-bottom">
+            <div><div class="fw-bold">${prof.nome} ${isManual ? '<span class="badge bg-warning text-dark ms-1" style="font-size:0.6rem;">Manual</span>' : ''}</div><small class="text-muted">${prof.escola}</small>${prof.rg ? `<div class="text-muted" style="font-size:0.75rem;">RG: ${prof.rg} | CPF: ${prof.cpf}</div>` : ''}</div>
+            <div class="d-flex align-items-center gap-2"><div class="btn-group"><button class="btn-presenca ${btnP}" onclick="registrarFrequencia(${prof.linha}, 'Presente', '${nomeSafe}', this)">Presente</button><button class="btn-presenca ${btnF}" onclick="registrarFrequencia(${prof.linha}, 'Falta', '${nomeSafe}', this)">Faltou</button></div><button class="btn btn-sm btn-outline-danger rounded-circle p-1 d-flex align-items-center justify-content-center" onclick="excluirIndicacao(${prof.linha}, '${nomeSafe}')" title="Excluir Indicação" style="border:none;"><span class="material-symbols-rounded" style="font-size: 1.2rem;">delete</span></button></div>
+          </div>`;
+      });
+      document.getElementById('modalListaPresenca').innerHTML = html; document.getElementById('modalFreq').style.display = 'flex';
+    }
+
+    function registrarFrequencia(linha, status, nomeProf, btnElement) {
+      let parent = btnElement.parentElement;
+      parent.querySelectorAll('.btn-presenca').forEach(b => b.className = 'btn-presenca btn-neutro');
+      btnElement.className = `btn-presenca ${status === 'Presente' ? 'btn-presente' : 'btn-falta'}`;
+      fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'salvarFrequencia', linha: linha, statusPresenca: status, nomeProf: nomeProf, pecLogado: nomeEspecialistaAtivo }) });
+    }
+
+    function fecharModal() { document.getElementById('modalEscola').style.display = 'none'; document.getElementById('modalFreq').style.display = 'none'; carregarDados(); }
+
+    function renderizarAnalytics(dados) {
+      if(!dados || !dados.kpis) return;
+      let k = dados.kpis;
+      document.getElementById('anTaxaPresenca').innerText = `${k.percPresenca}%`; document.getElementById('anTaxaFalta').innerText = `${k.taxaAbsenteismo}%`;
+      document.getElementById('anAdesaoEscolas').innerText = `${k.statusEscolas.totalEscolas > 0 ? Math.round((k.statusEscolas.concluidas/k.statusEscolas.totalEscolas)*100) : 0}%`;
+      document.getElementById('anAfastados').innerText = k.afastados;
+
+      if(chartFreqInstance) chartFreqInstance.destroy(); if(chartEscolasInstance) chartEscolasInstance.destroy(); if(chartTurnosInstance) chartTurnosInstance.destroy();
+      let ctxFreq = document.getElementById('chartFrequencia');
+      if(ctxFreq) { chartFreqInstance = new Chart(ctxFreq, { type: 'doughnut', data: { labels: ['Presentes', 'Faltas', 'Sem Registro'], datasets: [{ data: [k.presentes, k.faltas, Math.max(0, k.indicados - (k.presentes + k.faltas))], backgroundColor: ['#10b981', '#ef4444', '#e5e7eb'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } }); }
+      let ctxEsc = document.getElementById('chartEscolasStatus');
+      if(ctxEsc) { chartEscolasInstance = new Chart(ctxEsc, { type: 'pie', data: { labels: ['Concluídas', 'Parciais', 'Não Iniciadas'], datasets: [{ data: [k.statusEscolas.concluidas, k.statusEscolas.parciais, k.statusEscolas.naoIniciadas], backgroundColor: ['#10b981', '#0071e3', '#ef4444'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } }); }
+      let ctxTurnos = document.getElementById('chartTurnos');
+      if(ctxTurnos && dados.turnos.length > 0) { chartTurnosInstance = new Chart(ctxTurnos, { type: 'bar', data: { labels: dados.turnos.map(t => t.turno.length > 25 ? t.turno.substring(0,25) + '...' : t.turno), datasets: [ { label: 'Inscritos', data: dados.turnos.map(t => t.total), backgroundColor: '#0071e3', borderRadius: 8 }, { label: 'Presentes', data: dados.turnos.map(t => t.presentes), backgroundColor: '#10b981', borderRadius: 8 }, { label: 'Faltas', data: dados.turnos.map(t => t.faltas), backgroundColor: '#ef4444', borderRadius: 8 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { position: 'bottom' } } } }); }
+    }
+  </script>
+</body>
+</html>
