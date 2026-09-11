@@ -99,13 +99,10 @@
     .kanban-card { transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; }
     .kanban-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important; }
 
-    /* ESSENCIAL: Garante que os templates de impressão fiquem rigorosamente invisíveis na tela normal */
-    #printArea, #printListaArea { display: none !important; }
-
     /* ESTILOS DE IMPRESSÃO */
+    #printArea, #printListaArea { display: none !important; }
     @media print {
       body > * { display: none !important; }
-
       body.print-mode-dec #printArea { display: block !important; width: 100%; font-family: Arial, sans-serif; }
       .print-border { border: 5px double #000; padding: 40px 50px; min-height: 95vh; box-sizing: border-box; }
       .print-header-table { width: 100%; margin-bottom: 50px; text-align: center; }
@@ -117,13 +114,10 @@
       .print-body { font-size: 1.15rem; line-height: 2; text-align: justify; margin-bottom: 60px; }
       .print-indent { text-indent: 80px; margin-bottom: 25px; }
       .print-footer { text-align: right; margin-top: 60px; font-size: 1.1rem; }
-
       body.print-mode-lista @page { size: A4 landscape; margin: 8mm; }
       body.print-mode-lista #printListaArea { display: block !important; width: 100%; font-family: Arial, sans-serif; }
-      
       .print-page { width: 100%; box-sizing: border-box; }
       .page-break { page-break-after: always; break-after: page; }
-      
       .pl-header-table { width: 100%; margin-bottom: 10px; }
       .pl-header-text { text-align: center; font-size: 11px; line-height: 1.3; }
       .pl-title { font-size: 16px; font-weight: bold; text-align: center; margin: 15px 0; }
@@ -168,7 +162,7 @@
 
     <div class="container" style="max-width: 1020px;">
       
-      <!-- MENU DE ABAS (AGORA COM "NOVA FORMAÇÃO") -->
+      <!-- MENU DE ABAS -->
       <div class="text-center mb-4">
         <div class="liquid-segmented">
           <button id="btnAbaEscola" class="nav-active" onclick="mudarAba('escolas')"><span class="material-symbols-rounded fs-6">list</span> Lista</button>
@@ -193,7 +187,6 @@
           <div class="kpi-card"><div class="kpi-title text-danger">Faltas</div><div class="kpi-value text-danger" id="kpiFaltas">0</div></div>
         </div>
 
-        <!-- ABA 1: VISÃO POR ESCOLA (LISTA) -->
         <div id="viewEscolas">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <input type="text" id="inputPesquisaEscola" class="form-control rounded-pill px-4 py-2 glass-panel border-0 w-100 me-3" placeholder="Pesquisar unidade escolar..." onkeyup="filtrarEscolas()">
@@ -305,7 +298,6 @@
     </div>
   </div>
 
-  <!-- MODAL DE DETALHES DA ESCOLA -->
   <div class="modal-overlay" id="modalEscola">
     <div class="modal-content-apple">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3"><h5 class="fw-bold m-0 text-primary" id="modalTituloEscolaDetalhe">Escola</h5><button class="btn-close shadow-none" onclick="fecharModal()"></button></div>
@@ -314,7 +306,6 @@
     </div>
   </div>
 
-  <!-- MODAL DE CHAMADA -->
   <div class="modal-overlay" id="modalFreq">
     <div class="modal-content-apple">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3"><h5 class="fw-bold m-0 text-primary" id="modalTituloTurno">Turno</h5><button class="btn-close shadow-none" onclick="fecharModal()"></button></div>
@@ -323,7 +314,6 @@
     </div>
   </div>
 
-  <!-- MODAL CONFIGURAR LISTA DE PRESENÇA -->
   <div class="modal-overlay" id="modalConfigLista">
     <div class="modal-content-apple" style="max-width: 650px;">
       <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3">
@@ -368,7 +358,6 @@
     </div>
   </div>
 
-  <!-- ÁREAS DE IMPRESSÃO - FORA DO FLUXO VISUAL -->
   <div id="printArea">
     <div class="print-border">
       <table class="print-header-table">
@@ -386,11 +375,10 @@
       <div class="print-footer">São Vicente, <span id="printData"></span>.</div>
     </div>
   </div>
-
   <div id="printListaArea"></div>
 
   <script>
-    // URL DA API DO SEU AMBIENTE DE TESTES!
+    // URL DE TESTES:
     const API_URL = "https://script.google.com/macros/s/AKfycbzJD2xKp1M-3ulBjrY47k-2hA6T9mblC_3Jp-N6LbzVo05bPy6cAw_sdebfVyLMxfJV5g/exec";
 
     let dadosCache = null;
@@ -437,6 +425,60 @@
       });
     }
 
+    // ========== REQUISIÇÕES CONVERTIDAS PARA POST (EVITA CORS) ==========
+    function iniciarPainel() { 
+      fetch(API_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'getComponentes' })
+      })
+      .then(res => res.json())
+      .then(c => {
+        let sel = document.getElementById('selectComponenteDash');
+        sel.innerHTML = '<option value="Todos">Visão Geral (Todos os Componentes)</option>';
+        c.forEach(comp => sel.innerHTML += `<option value="${comp.nome}">${comp.nome}</option>`);
+        carregarDados(); 
+      }).catch((e) => {
+        console.error(e);
+        alert("Falha ao carregar as opções de formações no painel.");
+      });
+    }
+
+    function carregarDados() {
+      document.getElementById('dashboardContent').style.display = 'none'; document.getElementById('loadingScreen').style.display = 'block';
+      let filtroAtual = document.getElementById('selectComponenteDash').value;
+      
+      fetch(API_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'getDashboard', componente: filtroAtual })
+      })
+      .then(res => res.json())
+      .then(dados => { 
+        if(dados.erro) { alert("Erro reportado pelo sistema: " + dados.mensagem); document.getElementById('loadingScreen').style.display = 'none'; return; }
+        renderizarPainel(dados); 
+      }).catch((e) => { 
+        console.error(e);
+        alert("Falha de conexão com o banco de dados. Atualize a página."); 
+        document.getElementById('loadingScreen').style.display = 'none'; 
+      });
+    }
+
+    function carregarLogs() {
+      let tb = document.getElementById('tabelaLogs'); tb.innerHTML = '<tr><td colspan="4" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm"></div> Buscando histórico...</td></tr>';
+      fetch(API_URL, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'getLogs' })
+      })
+      .then(res => res.json())
+      .then(logs => {
+        tb.innerHTML = ''; if(logs.length === 0) { tb.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nenhum registro encontrado.</td></tr>'; return; }
+        logs.forEach(l => {
+          let badgeColor = l.acao === "Chamada" ? "apple-badge-green" : (l.acao === "Login" ? "apple-badge-gray" : (l.acao === "Exclusão" ? "apple-badge-red" : "apple-badge-blue"));
+          tb.innerHTML += `<tr><td class="text-muted" style="white-space:nowrap;">${l.data}</td><td class="fw-bold">${l.usuario}</td><td><span class="apple-badge ${badgeColor}" style="font-size:0.75rem;">${l.acao}</span></td><td>${l.detalhes}</td></tr>`;
+        });
+      }).catch(e => console.error(e));
+    }
+    // =======================================================================
+
     function dispararLembretes() {
       if(!confirm("Deseja disparar um e-mail de cobrança automatizado para TODAS as escolas que estão com status 'Não Iniciado' ou 'Parcial'?")) return;
       let btn = document.getElementById('btnLembretes'); let textoOriginal = btn.innerHTML;
@@ -453,28 +495,6 @@
         if(res.sucesso) { alert(`Sucesso! E-mails enviados para ${res.enviadas} escola(s).`); carregarLogs(); } 
         else { alert('Aviso: ' + res.mensagem); }
       }).catch(() => { alert('Erro de conexão ao tentar enviar lembretes.'); btn.innerHTML = textoOriginal; btn.disabled = false; });
-    }
-
-    function iniciarPainel() { 
-      fetch(`${API_URL}?action=getComponentes`)
-        .then(res => res.json())
-        .then(c => {
-          let sel = document.getElementById('selectComponenteDash');
-          sel.innerHTML = '<option value="Todos">Visão Geral (Todos os Componentes)</option>';
-          c.forEach(comp => sel.innerHTML += `<option value="${comp.nome}">${comp.nome}</option>`);
-          carregarDados(); 
-        }).catch(() => alert("Falha ao carregar as opções de formações no painel."));
-    }
-
-    function carregarDados() {
-      document.getElementById('dashboardContent').style.display = 'none'; document.getElementById('loadingScreen').style.display = 'block';
-      let filtroAtual = document.getElementById('selectComponenteDash').value;
-      fetch(`${API_URL}?action=getDashboard&componente=${encodeURIComponent(filtroAtual)}`)
-        .then(res => res.json())
-        .then(dados => { 
-          if(dados.erro) { alert("Erro reportado pelo sistema: " + dados.mensagem); document.getElementById('loadingScreen').style.display = 'none'; return; }
-          renderizarPainel(dados); 
-        }).catch(() => { alert("Falha de conexão com o banco de dados. Atualize a página."); document.getElementById('loadingScreen').style.display = 'none'; });
     }
 
     function renderizarPainel(dados) {
@@ -528,7 +548,6 @@
       if (aba === 'criacao' && document.getElementById('cfListaTurnos').innerHTML === '') cfAdicionarTurno();
     }
 
-    // ========== FUNÇÕES DA NOVA TELA "CRIAR FORMAÇÃO" ==========
     function cfAdicionarTurno() {
       let id = 'turno_' + Date.now();
       let html = `
@@ -623,8 +642,8 @@
           document.getElementById('cfAbertura').value = '';
           document.getElementById('cfLimite').value = '';
           document.getElementById('cfListaTurnos').innerHTML = '';
-          cfAdicionarTurno(); // Reinicia com 1 box limpo
-          iniciarPainel(); // Recarrega os dados do dropdown
+          cfAdicionarTurno(); 
+          iniciarPainel(); 
           carregarLogs();
         } 
         else { alert('Aviso: ' + res.mensagem); }
@@ -633,7 +652,6 @@
         btn.innerHTML = textoOriginal; btn.disabled = false;
       });
     }
-    // =======================================================
 
     function renderizarDeclaracoes() {
       todosProfessoresCache = [];
@@ -709,17 +727,6 @@
         else if(esc.status === 'Concluído') { colConcluida.innerHTML += cardHtml; countConcluida++; }
       });
       document.getElementById('kbCountNao').innerText = countNao; document.getElementById('kbCountParcial').innerText = countParcial; document.getElementById('kbCountConcluida').innerText = countConcluida;
-    }
-
-    function carregarLogs() {
-      let tb = document.getElementById('tabelaLogs'); tb.innerHTML = '<tr><td colspan="4" class="text-center py-4"><div class="spinner-border text-primary spinner-border-sm"></div> Buscando histórico...</td></tr>';
-      fetch(`${API_URL}?action=getLogs`).then(res => res.json()).then(logs => {
-          tb.innerHTML = ''; if(logs.length === 0) { tb.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nenhum registro encontrado.</td></tr>'; return; }
-          logs.forEach(l => {
-            let badgeColor = l.acao === "Chamada" ? "apple-badge-green" : (l.acao === "Login" ? "apple-badge-gray" : (l.acao === "Exclusão" ? "apple-badge-red" : "apple-badge-blue"));
-            tb.innerHTML += `<tr><td class="text-muted" style="white-space:nowrap;">${l.data}</td><td class="fw-bold">${l.usuario}</td><td><span class="apple-badge ${badgeColor}" style="font-size:0.75rem;">${l.acao}</span></td><td>${l.detalhes}</td></tr>`;
-          });
-        });
     }
 
     function renderizarEscolas(escolas) {
