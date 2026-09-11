@@ -312,7 +312,7 @@
   </div>
 
   <script>
-    // URL DE TESTES DA API (JÁ APONTANDO PRO SEU AMBIENTE CLONADO):
+    // URL DE TESTES DA API
     const API_URL = "https://script.google.com/macros/s/AKfycbzJD2xKp1M-3ulBjrY47k-2hA6T9mblC_3Jp-N6LbzVo05bPy6cAw_sdebfVyLMxfJV5g/exec";
 
     let estruturaCompleta = null, dadosAtuais = null, poloSelecionado = null;
@@ -324,7 +324,6 @@
     let calendarioEventosCache = null;
     const coresCalendario = ['#0071e3', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#f43f5e'];
 
-    // 🚀 LÓGICA ATUALIZADA: Puxa Dados via POST na carga inicial
     window.onload = function() { 
       fetch(API_URL, {
         method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
